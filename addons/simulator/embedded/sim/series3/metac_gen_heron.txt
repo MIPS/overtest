@@ -1,0 +1,321 @@
+-- ----------------------------------------------------------------------------
+--
+--                file : $RCSfile: metac_gen_heron.txt,v $
+--        release date : $Date: 2012/12/11 16:15:24 $
+--     release version : $Revision: 1.1 $
+-- release information : $State: Exp $
+--
+--           copyright : 2001-2008 by Imagination Technologies Limited. All rights
+--                       reserved. No part of this hardware description, either
+--                       material or conceptual may be copied or distributed,
+--                       transmitted, transcribed, stored in a retrieval system
+--                       or translated into any human or computer language in
+--                       any form by any means, electronic, mechanical, manual
+--                       or otherwise, or disclosed to third parties without
+--                       the express written permission of Imagination
+--                       Technologies Limited, Home Park Estate, Kings Langley,
+--                       Hertfordshire, WD4 8LZ, U.K.
+--
+-- ----------------------------------------------------------------------------
+
+--{{ Libraries
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+--}}
+
+-- ----------------------------------------------------------------------------
+-- package name: metx_heron_config_pack
+-- purpose: contains all the META core configuration constants
+-- ----------------------------------------------------------------------------
+
+package metx_heron_config_pack is
+
+   -- This chip uses META version:
+   -- V2.1.4 ID 2
+
+
+   -- ----
+   -- Core
+   -- ----
+   -- 1) Number of threads
+   --
+   --    Following settings allowed:
+   --      number of threads settings
+   --      ----------------- --------
+   --      2                 LOG_THREADS=1, NUM_THREADS=2**LOG_THREADS
+   --      3                 LOG_THREADS=2, NUM_THREADS=3
+   --      4                 LOG_THREADS=2, NUM_THREADS=2**LOG_THREADS
+   constant LOG_THREADS : integer := 1;
+   constant NUM_THREADS : integer := 2 ** LOG_THREADS;
+
+
+   -- 2) Thread capabilities
+   --    In effect signed 4-bit words (+ve has DSP, -ve has no DSP)
+   --
+   --    Following settings allowed:
+   --      DSP_CAPABLE       => thread has DSP capabilities
+   --      SMALL_DSP_CAPABLE => thread has DSP capabilities but reduced (GP_ONLY size) register set
+   --      GP_ONLY           => thread does not have DSP capabilities
+   subtype capability_type is std_logic_vector(3 downto 0);
+   constant GP_ONLY           : capability_type := "1100";
+   constant DSP_CAPABLE       : capability_type := "0000";
+   constant SMALL_DSP_CAPABLE : capability_type := "1101";
+
+   type capability_array is array(0 to 4-1) of capability_type;
+
+   -- thread core feature levels
+   constant THREAD_CAPS : capability_array := (SMALL_DSP_CAPABLE, -- T0
+                                               SMALL_DSP_CAPABLE, -- T1
+                                               GP_ONLY,     -- T2
+                                               GP_ONLY);    -- T3
+
+
+   -- 3) META DSP RAM size and DSP features
+   -- do we have DSP RAM at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DSP_RAM      : integer := 0;
+   -- if so, how big is it?
+   constant DSPRAM_SIZE       : integer := 128*1; -- (for 1 DSP thread:)
+   constant LOG_DSPRAM_SIZE   : integer := 7;     -- (= number of address bits)
+   -- FFT twiddle generator
+   -- (0 = not present, anything else = present)
+   constant GENERATE_FFT_TWID : integer := 0;
+   -- do we have DSP accumulators at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DSP_ACC      : integer := 0;
+   -- do we have DaOpPaMe templates at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DAOPPAME     : integer := 0;
+   -- do we have hardware loops at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_HW_LOOPS     : integer := 0;
+   -- do we have read pipelines at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_RD_PIPELINE  : integer := 0;
+
+
+   -- 4) floating point hardware
+   -- per thread settings
+   --
+   --    Following settings allowed:
+   --      NO_FPU_CAPABILITY => thread does not support hardware floating point
+   --      FPU_CAPABILITY_8  => thread supports hardware floating point with 8 32-bit registers
+   --      FPU_CAPABILITY_16 => thread supports hardware floating point with 16 32-bit registers
+   subtype fpu_capability_type is std_logic_vector(3 downto 0);
+   constant NO_FPU_CAPABILITY : fpu_capability_type := "0000";
+   constant FPU_CAPABILITY_8  : fpu_capability_type := "1000";
+   constant FPU_CAPABILITY_16 : fpu_capability_type := "1111";
+
+   -- thread FPU feature levels
+   constant FPU_THREAD_CAPS : capability_array := (FPU_CAPABILITY_16,  -- T0
+                                                   NO_FPU_CAPABILITY,  -- T1
+                                                   NO_FPU_CAPABILITY,  -- T2
+                                                   NO_FPU_CAPABILITY); -- T3
+
+   -- set to non-zero for reduced area (single precisiononly) FPU
+   constant REDUCED_FLOATING_POINT  : integer := 1;
+
+
+   -- 5) Other miscellaneous META core dialable config options
+   -- do we include global (thread shared) registers in AU and DU?
+   -- (0 = not present, anything else = present)
+   constant HAVE_GLOBAL_REGISTERS : integer := 0;
+   -- do we have branch prediction history (if not use static prediction rule)?
+   -- (0 = not present, anything else = present)
+   constant BPH_MASTER_CTRL       : integer := 0;
+   -- do we have a return prediction stack?
+   -- (0 = not present, anything else = present)
+   constant RETSTACK_MASTER_CTRL  : integer := 1;
+   -- and how big is it (2^n)?
+   constant LOG_RETSTACK_SIZE     : integer := 1;
+   -- do we include hardware code breakpoint support at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_BREAKPOINTS      : integer := 0;
+   -- do we include hardware data watchpoint support at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_WATCHPOINTS      : integer := 0;
+   -- do we include full AMA rate control functionality?
+   -- (0 = not present, anything else = present)
+   constant HAVE_AMA              : integer := 0;
+   -- do we include real time trace hardware at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_REAL_TIME_TRACE  : integer := 0;
+
+
+   -- 6) META Co-processor ports
+   --   (up to) eight co-processors for write
+   --   (up to) eight co-processors for read
+   type copro_array is array(0 to 8-1) of integer;
+   -- co-processor write port widths
+   --   0             => co-processor write port not used
+   --   anything else => co-processor write port present with width n
+   constant COPRO_WWIDTHS : copro_array := (
+                                            64, -- CP.0 present
+                                             0, -- CP.1 not present
+                                             0, -- CP.2 not present
+                                             0, -- CP.3 not present
+                                             0, -- CP.4 not present
+                                             0, -- CP.5 not present
+                                             0, -- CP.6 not present
+                                             0  -- CP.7 not present
+                                           );
+
+   -- co-processor read port widths
+   --   0             => co-processor read port not used
+   --   anything else => co-processor read port present with width n
+   constant COPRO_RWIDTHS : copro_array := (
+                                            64, -- CP.0 present
+                                             0, -- CP.1 not present
+                                             0, -- CP.2 not present
+                                             0, -- CP.3 not present
+                                             0, -- CP.4 not present
+                                             0, -- CP.5 not present
+                                             0, -- CP.6 not present
+                                             0  -- CP.7 not present
+                                           );
+
+
+   -- --------
+   -- Cache(s)
+   -- --------
+   -- 7) cache various options
+   -- icache and dcache data word size
+   constant CACHE_DW        : integer := 32;
+   -- log2 of icache and dcache data word size/8
+   constant LOG_CACHE_DWB   : integer := 2;
+   -- log2 of number of icache and dcache word in a icache line
+   constant LOG_CACHE_CLW   : integer := 4;
+   -- number of icache ways
+   constant NUM_ICACHE_WAYS : integer := 2;
+   -- log2 of number of icache ways
+   constant LOG_ICACHE_WAYS : integer := 1;
+   -- log2 of per way icache tag RAM depth
+   constant ICACHE_L2L      : integer := 6;
+   -- per way tag icache RAM width
+   constant ICACHE_TW       : integer := 24;
+   -- icache LRU ram(if existed) width
+   constant ICACHE_LRUW     : integer := 12;
+   -- number of dcache ways
+   constant NUM_DCACHE_WAYS : integer := 2;
+   -- log2 of number of dcache ways
+   constant LOG_DCACHE_WAYS : integer := 1;
+   -- log2 of per way dcache tag RAM depth
+   constant DCACHE_L2L      : integer := 5;
+   -- per way tag dcache RAM width
+   constant DCACHE_TW       : integer := 25;
+   -- dcache LRU ram(if existed) width
+   constant DCACHE_LRUW     : integer := 12;
+   -- Global data cache coherency
+   constant GLOBAL_C_COH    : integer := 0;
+
+
+   --  8) Icache and Dcache prefetches on or off(1 = on)
+   constant CACHE_RAPF      : integer := 1;
+    
+
+   --  9) Number of IC TLB entry per thread
+   constant NUM_IC_TLB_ENTRY_PT      : integer := 8;
+   constant LOG_NUM_IC_TLB_ENTRY_PT  : integer := 3;
+
+
+   -- 10) Number of DC TLB entry per thread
+   constant NUM_DC_TLB_ENTRY_PT      : integer := 8;
+   constant LOG_NUM_DC_TLB_ENTRY_PT  : integer := 3;
+
+
+   -- 11) Number of IC ST entry per thread
+   constant NUM_IC_ST_ENTRY_PT       : integer := 4;
+   constant LOG_NUM_IC_ST_ENTRY_PT   : integer := 2;
+
+
+   -- 12) Number of DC ST entry per thread
+   constant NUM_DC_ST_ENTRY_PT       : integer := 4;
+   constant LOG_NUM_DC_ST_ENTRY_PT   : integer := 2;
+
+
+   -- 13) Size of write combiner write buffer
+   constant WRCOMB_BSIZE : integer := 4;
+
+
+   -- 14) Read Width in 64-bit words out of MMU. (N.B. writes are always 64-bits
+   --     or less which get converted to the right number of bits by an external
+   --     write combiner)
+   --
+   --     Following settings allowed:
+   --       read width    settings
+   --       ----------    --------
+   --       64-bit reads  1
+   --       128-bit reads 2
+   constant NUM_RWORDS : integer := 1;
+
+
+   -- 15) Size of external system register ports
+   constant RG_ADDR_WIDTH_MAX : integer := 23;
+
+
+   -- ---
+   -- SoC
+   -- ---
+   -- 16) META post-reset boot state
+   -- 2^boot_count_width gives us the delay before we boot...
+   constant BOOT_COUNTER_WIDTH : integer := 10; -- 10-bits == 1024 clock cycles.
+
+
+   -- 17) Number of triggers supplied as support IP
+   --
+   --     Following settings allowed:
+   --       number of triggers settings
+   --       ------------------ --------
+   --       32 triggers        NUM_TRIGWORDS=1
+   --       64 triggers        NUM_TRIGWORDS=2
+   --       96 triggers        NUM_TRIGWORDS=3
+   --       128 triggers       NUM_TRIGWORDS=4
+   constant NUM_TRIGWORDS : integer := 3;
+
+
+   -- 18) External memory page size for write combining and in-page memory arbitration optimisation
+   --     It is the LOG2 of the page byte size, for example 12 = page size of 4kbytes
+   constant MEM_PAGE_SIZE_LOG2  : integer := 12;
+
+
+   -- ----------------
+   -- Config IDs, etc.
+   -- ----------------
+   -- 19) META group ID, bit31:24 of the CORE_ID_REG
+   constant META_GROUP_ID     : std_logic_vector( 7 downto 0) := "00010100";
+
+
+   -- 20) META core ID, bit23:16 of the CORE_ID_REG
+   constant META_CORE_ID      : std_logic_vector( 7 downto 0) := "00010001";
+
+   
+   -- 21) META config ID, bit10:0 of the CORE_ID_REG
+   constant META_CONFIG_REV   : std_logic_vector(10 downto 0) := "11011001001";
+
+
+   -- 22) Designer company ID, bit31:24 of CORE_REV_REG
+   constant META_DESIGNER_REV : std_logic_vector( 7 downto 0) := "00000000";
+
+
+   -- 23) Maintenance revision IF, bit7:0 of CORE_REV_REG
+   constant META_CHID_REV     : std_logic_vector( 7 downto 0) := "00000000";
+
+
+   -- 24) META core config2 ID, bit18:0 of the CORE_CONFIG2
+   constant META_CORE_CONFIG2 : std_logic_vector(18 downto 0) := "0000010000000010000";
+
+   -- 25) Spec and size of Meta Core Data Memory block (if not used set num to 0)
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   --
+   -- so, 9 bits of address is for 4Kb RAMs:
+   constant LOG_MCDMRAM_SIZE : integer := 13;
+   constant MCDMRAM_SIZE     : integer := 2 ** LOG_MCDMRAM_SIZE;
+   -- size (number of rams in the block)
+   constant NUM_MCDM_RAMS    : integer := 1;
+   constant LOG_MCDM_RAMS    : integer := 0;
+
+end metx_heron_config_pack;
+

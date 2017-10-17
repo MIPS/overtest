@@ -1,0 +1,350 @@
+/* Basic Pretification */
+div#fixedBox {position:absolute;top: 130px; }    /*No idea why but this is needed for safari to work*/
+@media screen
+  {
+  div#fixedBox {position: fixed; top: 130px;}
+ 
+  * html
+    {
+    overflow-y: hidden;
+    }
+  * html body
+    {
+    overflow-y: auto;
+    height: 100%;
+    }
+  * html div#fixedBox
+    {position: absolute; top: 140px;}           /*Not sure what courses a 10px difference*/
+  }
+
+body {
+	margin:0px;
+	padding:0px;
+	font-family:Tahoma, Arial, Helvetica, sans-serif;
+	background-color:#F5F1EB;
+}
+
+a {
+	text-decoration:underline;
+}
+
+a:link, a:active, a:visited {
+	color:#A68558;
+}
+
+a:hover {
+	color:#000000;
+}
+
+ul {
+	list-style-image:url('images/bullet.png');
+}
+
+img {
+	border:0px none;
+}
+
+.hidden {
+  display: none
+}
+
+.dom_link {
+  cursor: hand;
+  font-weight: normal;
+}
+
+a.dom_link {
+  color: black;
+}
+
+/* Curvy Boxes */
+
+.boxTopLeft {
+  background-image:url('images/boxTopLeft.png');background-repeat:no-repeat;background-position:top left;
+}
+.boxTopRight {
+  background-image:url('images/boxTopRight.png');background-repeat:no-repeat;background-position:top right;
+}
+.boxBottomLeft {
+  background-image:url('images/boxBottomLeft.png');background-repeat:no-repeat;background-position:bottom left;
+}
+.boxBottomRight {
+  background-image:url('images/boxBottomRight.png');background-repeat:no-repeat;background-position:bottom right;
+}
+
+.boxBottom {
+  background-image:url('images/boxBottom.png');background-repeat:repeat-x;background-position: bottom;
+}
+.boxTop {
+  background-image:url('images/boxTop.png');background-repeat:repeat-x;background-position: top;
+  background-color:white;
+}
+.boxLeft {
+  background-image:url('images/boxLeft.png');background-repeat:repeat-y;background-position: left;
+}
+.boxRight {
+  background-image:url('images/boxRight.png');background-repeat:repeat-y;background-position: right;
+}
+
+#actions, #versions, #categories,
+#attributes, #attributevalues, #resourcetypes, #resourcerequirements,
+#configgroups, #configoptions, #setting {
+  width: 250px;
+  height: 200px;
+}
+
+#dependencies, #testrun {
+  width: 390px;
+  height: 200px;
+}
+
+#resultInfo {
+  margin: 10px;
+}
+
+
+/* Layout */
+#LayoutTop {
+  margin:0 auto;
+  margin-top:10px;
+  padding: 10px;
+  padding-bottom:0;
+  height:100px;
+}
+
+#LayoutMain {
+	margin:0 auto;
+	margin-top:20px;
+}
+
+#ContentMain {
+  margin: 10px;
+  margin-top:0;
+}
+
+#TestrunSearch {
+  border: 1px dashed black;
+  width: 95%;
+  margin: 10px;
+  padding: 10px;
+}
+
+h1 {
+  font-size: 140%;
+  margin: 0 0 10px 0;
+}
+
+h2 {
+  font-size: 120%;
+  margin: 00 0 0 10px;
+}
+
+#Logo {
+  float:left;
+  vertical-align: middle;
+  margin: 14px;
+  width:190px;
+  height: 100px;
+}
+#ErrorMessage {
+  float:left;
+  vertical-align: bottom;
+  color:red;
+}
+
+/* Content */
+
+#ContentTop{
+	vertical-align:bottom;
+	height:100px;	
+	text-align:right;
+	padding:10px;
+        float:right;
+}
+
+#ContentTop h1{
+	font-size:120%;
+  margin-top: 5px;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+#Menu {
+	float:right;
+	vertical-align:bottom;
+	font-size:80%;
+	margin:0px;
+}
+
+#Menu a {
+	text-decoration:none;
+	color:#000000;
+}
+
+#logo{
+	float:left;
+	height:100px;
+	margin:5px;
+	margin-bottom:10px;
+}
+
+
+.loginStatus {
+	font-size:80%;
+	color:#666666;
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+
+
+/* Image Templates */
+.label {
+	width:100px;
+}
+
+/* Forms */
+
+.formbutton {
+	color:#ffffff;
+	font-weight:bold;
+	background-color:#5B839F;
+	border-top:1px outset #8BA3CF;
+	border-left:1px outset #8BA3CF;
+	border-bottom:1px outset #ABC3EF;
+	border-right:1px outset #ABB3EF;
+}
+
+.textbox, .textarea {
+	border-top:1px inset #5B839F;
+	border-left:1px inset #5B839F;
+	border-bottom:1px inset #5B839F;
+	border-right:1px inset #5B839F;
+	z-index:100;
+}
+
+.checkbox {
+  margin:0;
+  padding:0;
+}
+
+.textbox {
+	padding:2px;
+}
+
+.listTable {
+        width: 95%;
+        margin:0 auto;
+	font-size:90%;
+        background-color: white;
+}
+
+.listTable td {
+	border-top:1px solid #E1E8EE;
+	vertical-align:top;	
+	padding-top:2px;
+	padding-bottom:2px;
+}
+
+.group td {
+  padding-top:10px;
+  border-top:3px solid #E1E8EE;
+  border-bottom:3px solid #E1E8EE;
+}
+
+.listTable th{
+	vertical-align:top;
+	color:#A68558;
+	padding-bottom:10px;
+}
+
+.listTable .check, .listTable .sent, .listTable .options, .listTable .status, .trackDetails .clean, .trackDetails .dirty, .trackDetails .recommended, .trackDetails .options{
+	text-align:center;
+}
+
+.notdone {
+  color: red;
+}
+
+.addtotestrun {
+  color: #009966;
+}
+
+.removefromtestrun {
+  color: #CC0033;
+}
+
+/* Footer */
+#Footer {
+	width:100%;
+	margin-top:20px;
+	text-align:center;
+	font-size:70%;
+	color:#CCCCCC;
+}
+
+.resultstable {
+  border: 3px solid black;
+}
+
+.resultstable th {
+  border-bottom: 3px solid black;
+}
+
+.resultstable .overallresult {
+  border-right: 3px solid black;
+  text-align: center;
+}
+
+.resultstable .resultgroups {
+  border-right: 3px solid black;
+  border-bottom: 3px solid black;
+}
+
+.resultstable .testrunnumber {
+  border-right: 3px solid black;
+  border-top: 3px solid black;
+  border-bottom: 0;
+  text-align: center;
+}
+
+.resultstable .lastuserresult {
+  text-align: center;
+}
+
+.resultstable .userresult {
+  border-right: 1px dashed black;
+  text-align: center;
+}
+
+.resultstable .testname {
+  border-right: 1px dashed black;
+}
+
+.resultstable td {
+  border-bottom: 1px solid black;
+  padding:  3px;
+}
+
+.pass {
+  color: black;
+}
+
+.fail {
+  color: #ffffff;
+  background-color: #800000
+}
+.na {
+  color: black;
+}
+
+.clickable {
+  text-decoration: underline;
+  color: #0000a0;
+}
+
+.clickable:hover {
+  cursor: pointer;
+  cursor: hand;
+  color: #0080c0;
+}

@@ -1,0 +1,77 @@
+digraph G {
+size="8.2,9";
+ratio=compress;
+node [fontname="Arial"];
+edge [fontname="Arial"];
+{
+  node [shape=Msquare];
+  "GONE1" [label="GONE"];
+  "GONE2" [label="GONE"];
+  "GONE3" [label="GONE"];
+  "GONE4" [label="GONE"];
+  "ARCHIVED";
+}
+
+{
+rank=same;
+"CREATION" [peripheries=2];
+"READY TO CHECK";
+"CHECK FAILED";
+"GONE2";
+}
+
+{
+rank=same;
+"HOST ALLOCATION FAILED";
+}
+
+{
+rank=same;
+"HOST ALLOCATED";
+"CHECKED";
+"RUNNING";
+"PAUSED";
+}
+
+{
+rank=same;
+"COMPLETED";
+"ABORTED";
+}
+
+{
+rank=same;
+"DELETING";
+"ARCHIVING";
+}
+
+{
+rank=same
+"ARCHIVED";
+}
+
+{
+
+"CREATION" -> "READY TO CHECK" [label="Submit for checking"];
+"READY TO CHECK" -> "CHECK FAILED" [label="Check failed"];
+"READY TO CHECK" -> "CHECKED" [label="Check passed"];
+"CHECK FAILED" -> "READY TO CHECK" [label="Submit for checking"];
+"CHECKED" -> "HOST ALLOCATION FAILED" [label="Allocation Failed"];
+"HOST ALLOCATION FAILED" -> "READY TO CHECK" [label="Submit for checking"];
+"CHECKED" -> "HOST ALLOCATED" [label="Allocation succeeded"];
+"HOST ALLOCATED" -> "RUNNING" [label="Testrun chosen"];
+"RUNNING" -> "COMPLETED" [label="All tasks passed"];
+"RUNNING" -> "PAUSED" [label="Pause"];
+"PAUSED" -> "RUNNING" [label="Resume"];
+"RUNNING" -> "ABORTED" [label="Abort"];
+"CREATION" -> "GONE1" [label="Delete"];
+"CHECK FAILED" -> "GONE2" [label="Delete"];
+"HOST ALLOCATION FAILED" -> "GONE3" [label="Delete"];
+"COMPLETED" -> "DELETING" [label="Delete"];
+"ABORTED" -> "DELETING" [label="Delete"];
+"DELETING" -> "GONE4" [label=""];
+"COMPLETED" -> "ARCHIVING" [label="Archive"];
+"ABORTED" -> "ARCHIVING" [label="Archive"];
+"ARCHIVING" -> "ARCHIVED" [label=""];
+}
+}

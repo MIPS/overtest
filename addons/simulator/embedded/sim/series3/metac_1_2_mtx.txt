@@ -1,0 +1,254 @@
+-- *****************************************************************************
+--
+--                file : $RCSfile: metac_1_2_mtx.txt,v $
+--        release date : $Date: 2012/12/11 16:15:24 $
+--     release version : $Revision: 1.1 $
+-- release information : $State: Exp $
+--
+--           copyright : 2005 by Imagination Technologies Limited. All rights
+--                       reserved. No part of this hardware description, either
+--                       material or conceptual may be copied or distributed,
+--                       transmitted, transcribed, stored in a retrieval system
+--                       or translated into any human or computer language in
+--                       any form by any means, electronic, mechanical, manual
+--                       or otherwise, or disclosed to third parties without
+--                       the express written permission of Imagination
+--                       Technologies Limited, Home Park Estate, Kings Langley,
+--                       Hertfordshire, WD4 8LZ, U.K.
+--
+-- *****************************************************************************
+
+------------------------------------------------------------------------------
+-- package name: meta_user_pack
+-- purpose: contains all the META core user configurable constants
+------------------------------------------------------------------------------
+
+--{{ Libraries
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+--}}
+
+package meta_user_pack is
+
+-- This chip uses MTX version:
+-- V1.2.2 ID 0
+
+
+-- 1) Number of threads
+--
+--    Following settings allowed:
+--      number of threads settings
+--      ----------------- --------
+--      2                 log_threads=1, num_threads=2**log_threads
+--      3                 log_threads=2, num_threads=3
+--      4                 log_threads=2, num_threads=2**log_threads
+constant log_threads : integer := 0;
+constant num_threads : integer := 1;
+
+
+-- 2) Thread capabilities
+--    In effect signed 4-bit words (+ve has DSP, -ve has no DSP)
+--
+--    Following settings allowed:
+--      DSP_CAPABLE => thread has DSP capabilities
+--      GP_ONLY     => thread does not have DSP capabilities
+subtype capability_type is std_logic_vector(3 downto 0);
+constant GP_ONLY     : capability_type := "1100";
+constant DSP_CAPABLE : capability_type := "0000";
+
+type capability_array is array(0 to 4-1) of capability_type;
+
+-- thread feature levels
+constant thread_caps : capability_array := (MTX,        -- T0
+                                            GP_ONLY,    -- T1
+                                            GP_ONLY,    -- T2
+                                            GP_ONLY);   -- T3
+
+
+-- 3) META DSP RAM size and features
+constant dspram_size       : integer := 128*1; -- (for 3 DSP threads:)
+constant log_dspram_size   : integer := 7;     -- (= number of address bits)
+-- FFT twiddle generator (0 = not present, 0 = present)
+constant generate_fft_twid : integer := 0;
+
+
+-- 4) META Co-processor ports
+--   (up to) eight co-processors for write
+--   (up to) eight co-processors for read
+type copro_array is array(0 to 8-1) of integer;
+-- co-processor write port widths
+--   0             => co-processor write port not used
+--   anything else => co-processor write port present with width n
+constant copro_wwidths : copro_array := (64,
+                                         64,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0);
+
+-- co-processor read port widths
+--   0             => co-processor read port not used
+--   anything else => co-processor read port present with width n
+constant copro_rwidths : copro_array := (64,
+                                         64,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0,
+                                          0);
+
+
+-- 5) META post-reset boot state
+--
+-- Boot address, and option as to whether we boot or not
+--
+-- this is 0xC0000000
+constant boot_addr        : std_logic_vector(29 downto 0) := "110000000000000000000000000000";
+-- 2^boot_count_width gives us the delay before we boot...
+constant boot_counter_width : integer := 10; -- 10-bits == 1024 clock cycles.
+
+
+-- 6) cache size in kilobytes
+--
+--    Following settings allowed:
+--      size settings
+--      ---- --------
+--      10k  cache_size=10, cache_l2l=6, cache_tw=26  ** recommended for two threads
+--      16k  cache_size=16, cache_l2l=6, cache_tw=26  ** recommended for two or four threads
+--      32k  cache_size=32, cache_l2l=7, cache_tw=25  ** recommended for four threads
+constant cache_size : integer := 16;
+constant cache_l2l  : integer := 6;
+constant cache_tw   : integer := 26;
+
+
+-- 7) Number of scan chains
+constant num_scan_chains : integer := 50;
+
+
+-- 8) Size of write combiner write buffer
+constant wrcomb_bsize : integer := 4;
+
+
+-- 9) Local bus options
+constant lb_num_dma       : integer := 2;
+constant lb_fifo_qdepth   : integer := 16;
+constant lb_fifo_ptrwidth : integer := 4;
+constant lb_fifo_option   : integer := 1; -- 0 for 8 depth , 1 for 16 depth
+
+
+-- 10) Spec and size of the Meta Core Code Memory block (if not used set all
+--     the nums to 0)
+-- a) ROMs:
+-- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+-- which gives a *8 multiplier
+--
+-- so, 14 bits of address is for 128Kb ROMs:
+constant log_mccmrom_size : integer := 0;
+constant mccmrom_size     : integer := 0;
+-- size (number of roms in the block)
+constant num_mccm_roms    : integer := 0;
+constant log_mccm_roms    : integer := 0;
+-- b) RAMs:
+-- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+-- which gives a *8 multiplier
+--
+-- so, 13 bits of address is for 64Kb RAMs:
+constant log_mccmram_size : integer := 13;
+constant mccmram_size     : integer := 2 ** log_mccmram_size;
+-- size (number of rams in the block)
+constant num_mccm_rams    : integer := 8;
+constant log_mccm_rams    : integer := 3;
+-- c) ROMs and RAMs repeat sizes, etc.
+-- This is the interval in bits at which the ROM/RAM repeats with the ROM part
+-- fitting within the first half of this and the RAM part in the second half.
+--
+-- so, 2+12 bits of RAM needs 14 bits here
+constant log_mccmrpt_size : integer := 15;
+
+
+-- 11) Spec and size of Meta Core Data Memory block (if not used set num to 0)
+-- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+-- which gives a *8 multiplier
+--
+-- so, 13 bits of address is for 64Kb RAMs:
+constant log_mcdmram_size : integer := 13;
+constant mcdmram_size     : integer := 2 ** log_mcdmram_size;
+-- size (number of rams in the block)
+constant num_mcdm_rams    : integer := 8;
+constant log_mcdm_rams    : integer := 3;
+
+
+-- 12) Read Width in 64-bit words out of MMU. (N.B. writes are always 64-bits
+--     or less which get converted to the right number of bits by an external
+--     write combiner)
+--
+--     Following settings allowed:
+--       read width    settings
+--       ----------    --------
+--       64-bit reads  1
+--       128-bit reads 2
+constant num_rwords : integer := 1;
+
+
+-- 13) Number of triggers supplied as support IP
+--
+--     Following settings allowed:
+--       number of triggers settings
+--       ------------------ --------
+--       32 triggers        num_trigwords=1
+--       64 triggers        num_trigwords=2
+--       96 triggers        num_trigwords=3
+--       128 triggers       num_trigwords=4
+constant num_trigwords : integer := 3;
+
+
+-- 14) META chip ID register bottom 8-bits
+--     This chip has a META chip ID of 2
+constant meta_chid_rev : std_logic_vector(7 downto 0) := "00000010";
+
+
+-- 15) Number/size of external system register ports
+constant num_rg_ports      : integer := 1;
+constant rg_addr_width_max : integer := 16;
+
+
+-- 16) Number of masters input to xbar
+constant num_masters      : integer := 8;
+constant log2_num_masters : integer := 3;
+
+
+-- 17) Master write combiner enable control
+--     Field allocation as follows:
+--       Bit              Master
+--       --------------   ----------------
+--       7                PDP
+--       6                ECP
+--       5                DMA
+--       4                USB
+--       3                META thread 3
+--       2                META thread 2
+--       1                META thread 1
+--       0                META thread 0        
+constant master_wc_enables : std_logic_vector(num_masters-1 downto 0) := "00001111";
+
+
+-- 18) RAMs inside or outside?
+-- RAMs instantiated at the top (0=no, otherwise=yes)
+constant master_riat : integer := 1;
+
+
+-- 19) main memory arbiter holdoff metric
+constant holdoff_width : integer := 12;
+
+-- 20) main memory arbiter metric widths
+-- 
+--     The bottom 8 LSB is for the meta thread only
+constant metric_width : integer := 12;
+
+end meta_user_pack;
+

@@ -1,0 +1,14 @@
+---
+group: LLVM Autobuild
+description: Autobuild
+concurrency: 2
+autoarchive: yes
+priority: 1000
+definition:
+- LLVM:
+    Fetch: CHANGELIST
+    AutoconfBuildCross: CHANGELIST
+    CMakeBuildCross: CHANGELIST
+configuration:
+- LLVM Inputs:
+    LLVM_P4_CHANGELIST: '<int>'

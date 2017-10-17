@@ -1,0 +1,37 @@
+/******************************************************************************
+*
+*              file : $RCSfile: METAmorph_memory.img,v $
+*            author : $Author: mpf $
+* date last revised : $Date: 2009/07/23 13:10:23 $
+*   current version : $Revision: 1.1 $
+*
+*   copyright       : 2005 by Imagination Technologies. All rights reserved.
+*                     No part of this software, either material or conceptual
+*                     may be copied or distributed, transmitted, transcribed,
+*                     stored in a retrieval system or translated into any
+*                     human or computer language in any form by any means,
+*                     electronic, mechanical, manual or otherwise, or
+*                     disclosed to third parties without the express written
+*                     permission of:
+*                       Imagination Technologies, Home Park Estate,
+*                       Kings Langley, Hertfordshire, WD4 8LZ, U.K.
+*
+*       description : Memory regions for METAmorph board
+*
+******************************************************************************/
+
+
+/* 32MB of SDRAM at physical address 0xB0000000 */
+MEMORY sdram    ORIGIN 0xB0000000 SIZE 0x02000000
+
+/* 320K of internal memory at 0xE0000000 */
+MEMORY intram   ORIGIN 0xE0000000 SIZE 0x00050000
+
+/* Internal static MMU table */
+MEMORY internal_mmu ORIGIN 0x02030000 SIZE 0x00010000
+
+/* Core memories  */
+MEMORY corecrom ORIGIN 0x80000000 SIZE 0x20000		/* 128k boot ROMs */
+MEMORY corecode ORIGIN 0x80020000 SIZE 0x10000		/* 64k core code memory */
+MEMORY coredata ORIGIN 0x82000000 SIZE 0x10000		/* 64k core data memory */
+

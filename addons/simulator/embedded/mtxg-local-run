@@ -1,0 +1,126 @@
+#!/bin/sh
+
+# Wrapper for DA-tools on linux
+# This script will either run ldlk on a partially linked elf or run a boot.js script
+# directly.
+
+# $1 - The partially linked elf to execute or boot.js
+# $METAG_INST_ROOT must be set to a valid toolkit
+# $DA_NAME must be set to a valid DA script addressable name
+# BOARD can be set to 'fpga' to target an fpga board
+
+if [ "x$METAG_INST_ROOT" = x  ] ; then
+  echo "Please set METAG_INST_ROOT"
+  exit 400
+fi
+
+script_path=`dirname $0`
+
+if [ "x$METAG_NOEXECUTE" = "x" ]; then
+
+  if [ "x$METAG_SIM" = "x" ]; then
+    if [ "x$DA_NAME" = "x" ]; then
+      echo "Please set DA_NAME"
+      exit 300
+    fi
+    
+  else
+    if [ "x$METAG_FSIM_ROOT" = "x" ]; then
+      echo "Please set METAG_FSIM_ROOT"
+      exit 400
+    fi
+  fi;
+fi
+
+if [ "x$1" = x  ] ; then
+  echo "Please specify a test to run"
+  exit 200
+fi
+
+if [ ! -f "$1" ] ; then
+  echo "File not found"
+  exit 150
+fi
+
+folder=`dirname $1`
+
+pushd $folder > /dev/null
+
+folder=`pwd`
+
+exe=`basename $1`
+
+if [ "x$METAG_NOEXECUTE" == "x" ]; then
+
+  if [ "x$METAG_SIM" = "x" ]; then
+    $script_path/SingleTest -D $DA_NAME $folder/$loadjs
+
+    result=$?
+    if [ $result -ne 0 ] ; then
+      echo "Failed to run test"
+      exit $result
+    fi
+  else
+    # Simulate!
+    # Copy the correct simulator config
+    export METACNAME=mtx
+
+    if [ -e $METAG_FSIM_ROOT/local/bin/inscript-sim ]
+    then
+      sim_series=3
+    else
+      sim_series=4
+    fi
+
+    if [ ! -e $script_path/sim/series$sim_series/metac_1_2_$METACNAME.txt ]; then
+      echo "Simulator config not found";
+      exit 500;
+    fi
+    cp $script_path/sim/series$sim_series/metac_1_2_$METACNAME.txt ./
+    cp ${exe} out.dnl
+    cp $script_path/mtx.out.inscript  out.txt ;
+
+    # Run the binary
+    quiet="-quiet"
+    if [ "x$DEBUG" != "x" ]; then
+      quiet=""
+    fi
+
+    if [ -e $METAG_FSIM_ROOT/local/bin/inscript-mtxg-1.2 ]
+    then
+      nice $METAG_FSIM_ROOT/local/bin/inscript-mtxg-1.2 -insimtest -rc 1 $quiet
+    else
+      export LD_LIBRARY_PATH=$METAG_FSIM_ROOT/local/lib 
+      cp $script_path/Minibench/MemorySetup/MemorySetup_mtx_core_external.py MemorySetup.py
+      cp $script_path/mtx.py ldrout.py
+      file $METAG_FSIM_ROOT/local/lib/libmbsimcapi.so | grep "32-bit" > /dev/null
+
+      if [ $? -eq 0 ]; then
+        python="2.7.2:x32"
+      else
+        python="2.7.2:x64"
+      fi
+
+      python_inst_root=`neo select Python $python`
+
+      if [ $? -ne 0 ]; then
+        echo "ERROR: can’t find a suitable python executable"
+        exit 500
+      fi
+
+      python_inst_root="${python_inst_root##*=}"
+
+      nice $python_inst_root/bin/python $script_path/Minibench/runSim.py --quiet --mtx --insimtest --rc 1 
+    fi 
+
+    result=$?
+    rm -f out.txt out.dnl metac_1_2_$METACNAME.txt MemorySetup.py ldrout.py
+    if [ $result -ne 0 ]; then
+      exit $result
+    fi
+  fi
+
+fi
+
+popd > /dev/null
+exit 0;

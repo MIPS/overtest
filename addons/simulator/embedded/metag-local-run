@@ -1,0 +1,218 @@
+#!/bin/sh
+
+# Wrapper for DA-tools on linux
+# This script will either run ldlk on a partially linked elf or run a boot.js script
+# directly.
+
+# $1 - The partially linked elf to execute or boot.js
+# $METAG_INST_ROOT must be set to a valid toolkit
+# $DA_NAME must be set to a valid DA script addressable name
+# BOARD can be set to 'fpga' to target an fpga board
+
+if [ "x$METAG_INST_ROOT" = x  ] ; then
+  echo "Please set METAG_INST_ROOT"
+  exit 400
+fi
+
+script_path=`dirname $0`
+
+if [ "x$METAG_NOEXECUTE" = "x" ]; then
+
+  if [ "x$METAG_SIM" = "x" ]; then
+    if [ "x$DA_NAME" = "x" ]; then
+      echo "Please set DA_NAME"
+      exit 300
+    fi
+  else
+    if [ "x$METAG_FSIM_ROOT" = "x" ]; then
+      echo "Please set METAG_FSIM_ROOT"
+      exit 400
+    fi
+  fi;
+fi
+
+if [ "x$1" = x  ] ; then
+  echo "Please specify a test to run"
+  exit 200
+fi
+
+if [ ! -f "$1" ] ; then
+  echo "File not found"
+  exit 150
+fi
+
+folder=`dirname $1`
+
+pushd $folder > /dev/null
+
+folder=`pwd`
+
+loadjs=`basename $1`
+
+if [ "$loadjs" != "${loadjs%%.js}.js" ]; then
+  cp $loadjs boot.elf
+  
+  imgfiles=()
+  imgfiles[0]=$script_path/img/METAmorph_memory.img
+  imgfiles[1]=$script_path/img/ldlk-metamorph.img
+  imgfiles[2]=$script_path/img/Ch2_153.6MHz.img
+  loadjs="boot.js"
+
+  ldlkargs=""
+  for i in $(seq 0 $((${#imgfiles[@]} - 1))) ; do
+    ldlkargs="$ldlkargs -T${imgfiles[i]}"
+  done
+
+  tempfile=`mktemp`
+  tempfile2=`mktemp`
+  trap "{ rm -f $tempfile; rm -f $tempfile2; }" EXIT
+  $METAG_INST_ROOT/metag-local/bin/ldlk -g $ldlkargs > $tempfile 2> $tempfile2
+  
+  if [ $? -ne 0 ] ; then
+    fail=1
+    dominim=0
+    grep "mminim option required" $tempfile2 > /dev/null 2> /dev/null
+    if [ $? -eq 0 ] ; then
+      $METAG_INST_ROOT/metag-local/bin/ldlk -g  -mminim $ldlkargs > $tempfile 2> $tempfile2
+      fail=$?
+    fi
+
+    if [ $fail -ne 0 ] ; then
+      cat $tempfile
+      cat $tempfile2
+      echo "Failed to post link"
+      exit 100
+    fi
+  fi
+  cat $tempfile
+  rm -f $tempfile
+  rm -f $tempfile2
+fi
+
+if [ "x$METAG_NOEXECUTE" == "x" ]; then
+
+  if [ "x$METAG_SIM" = "x" ]; then
+    $script_path/SingleTest -D "$DA_NAME" $folder/$loadjs
+
+    result=$?
+    if [ $result -ne 0 ] ; then
+      exit $result
+    fi
+
+  else
+    # Simulate!
+
+    # Errors and warnings are painful at the moment. All tempfiles grepping and sedding should be removed as soon as the tools can be told not to emit them.
+
+    # Copy the correct simulator config
+    export METACNAME=$METAG_SIM 
+
+    if [ -e $METAG_FSIM_ROOT/local/bin/inscript-sim ]
+    then
+      sim_series=3
+    else
+      sim_series=4
+    fi
+
+    if [ ! -e $script_path/sim/series$sim_series/metac_gen_$METACNAME.txt ]; then
+      echo "Simulator config not found";
+      exit 500;
+    fi
+    tempfile=`mktemp`
+    trap "{ rm -f $tempfile; }" EXIT
+
+    case $METAG_SIM in
+      214)
+        METAG_SIM=metac_2_1_4_default.txt
+        ;;
+      122)
+        METAG_SIM=metac_1_2_default.txt
+        ;;
+      harrier)
+        METAG_SIM=metac_2_1_3_2t2d16.txt
+        ;;
+      heron)
+        METAG_SIM=metac_2_1_heron.txt
+        ;;
+      kfish)
+        METAG_SIM=metac_2_1_kfish.txt
+        ;;
+      stork)
+        METAG_SIM=metac_2_1_stork.txt
+        ;;
+    esac
+
+    if [ -f $METAG_FSIM_ROOT/local/bin/$METAG_SIM ]; then
+      grep "META_CHID_REV.*00000001" $METAG_FSIM_ROOT/local/bin/$METAG_SIM > /dev/null
+      if [ $? -eq 0 ]; then
+        sed -e "s/\(-- V[0-9]*.[0-9]*.[0-9]* ID \)[0-9]*/\11/" $METAG_FSIM_ROOT/local/bin/$METAG_SIM > metac_gen_test.txt
+      else
+        cp $METAG_FSIM_ROOT/local/bin/$METAG_SIM metac_gen_test.txt
+        chmod +w metac_gen_test.txt
+      fi
+      export METACNAME="test"
+    else
+      cp $script_path/sim/series$sim_series/metac_gen_$METACNAME.txt ./
+    fi
+
+    # Convert to a simulator binary (and deal with the output accordingly)
+    if [ -e $METAG_FSIM_ROOT/local/bin/inscript-sim ]
+    then
+       $METAG_FSIM_ROOT/metag-local/bin/ldr2out -q ${loadjs%%.js}.ldr --regstate out.txt --memstate out.dnl 2>&1 | tee $tempfile > /dev/null
+    else
+       $METAG_FSIM_ROOT/metag-local/bin/ldrdump -q ${loadjs%%.js}.ldr --regstate out.txt --memstate out.dnl --minibench ldrout.py 2>&1 | tee $tempfile > /dev/null
+    fi
+
+    if [ $? -ne 0 ]; then
+      grep -v "getopt: invalid option -- q" $tempfile
+      echo "Could not convert ldr to out"
+      exit 500
+    fi
+    grep -v "getopt: invalid option -- q" $tempfile
+
+    # swap the end command from out.txt to be a finite but HUGE timeout.
+    sed -ie "s/POL :REGMETA:04800000 00000000 00000001 0 0/POL :REGMETA:04800000 00000000 00000001 0 4294967295/g" out.txt
+    
+    # Run the binary
+    quiet="-quiet"
+    if [ "x$DEBUG" != "x" ]; then
+      quiet=""
+    fi
+
+    if [ -e $METAG_FSIM_ROOT/local/bin/inscript-sim ]
+    then
+       nice $METAG_FSIM_ROOT/local/bin/inscript-sim -insimtest -rc 1 $quiet
+    else
+      export LD_LIBRARY_PATH=$METAG_FSIM_ROOT/local/lib 
+      cp $script_path/Minibench/MemorySetup/MemorySetup_core_external.py MemorySetup.py
+      file $METAG_FSIM_ROOT/local/lib/libmbsimcapi.so | grep "32-bit" > /dev/null
+
+      if [ $? -eq 0 ]; then
+        python="2.7.2:x32"
+      else
+        python="2.7.2:x64"
+      fi
+
+      python_inst_root=`neo select Python $python`
+
+      if [ $? -ne 0 ]; then
+        echo "ERROR: can’t find a suitable python executable"
+        exit 500
+      fi
+
+      python_inst_root="${python_inst_root##*=}"
+
+      nice $python_inst_root/bin/python $script_path/Minibench/runSim.py --quiet --insimtest --rc 1 
+    fi    
+    
+    result=$?
+    rm -f out.txt out.dnl MemorySetup.py
+    if [ $result -ne 0 ]; then
+      exit $result
+    fi
+  fi
+
+fi
+
+popd > /dev/null
+exit 0;

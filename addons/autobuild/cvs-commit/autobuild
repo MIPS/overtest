@@ -1,0 +1,148 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+# Minimal script to support automatic submission of build/test jobs
+#
+# Any problems call Jim Whittaker or Rob Isherwood in Metagence KL
+#
+# INSTALLATION (as root):
+#   Copy script such that it is executable by the cvs daemon
+#   Configure the directory to drop ccs commit information
+#     (see CONFIGURE_ME below)
+my $DIR = CONFIGURE_ME;
+
+use Fcntl ':mode';
+use File::Temp qw(tempfile);
+
+die "Not enough arguments" unless scalar(@ARGV) > 0;
+
+# CVS passes us a single argument of the form:
+# <repository>( ,<filename>,<old-version>,<new-version>,)+
+my @args = split /,/, shift(@ARGV), -1;
+
+my $repo = shift @args;
+$repo =~ s/ $//; # Remove trailing space
+
+my %files;
+
+while (scalar(@args) >= 4)
+{
+  my $f = shift @args;
+  my $ov = shift @args;
+  my $nv = shift @args;
+  my $sep = shift @args;
+
+  die "Expected empty field" unless $sep =~ /^ ?$/;
+  $files{$f} = { old_version => $ov, new_version => $nv };
+}
+
+my %options;
+# Consume stdin to keep cvs happy
+{
+  # Tell perl to ignore newlines and read the stream in one go
+  # This also affects the s/// operator's handling of a newline
+  local $/ = undef;
+  $_ = <STDIN>;
+
+  my $option_mode = 0;
+  my $option_name = undef;
+  while (length ($_) > 0)
+  {
+    if ($option_mode)
+    {
+      if (s/^(}} ?)//)
+      {
+        # Option terminator. Consume a single space if present
+        # to avoid a double space in the message
+        $option_mode = 0;
+        $option_name = undef;
+      }
+      elsif (defined($option_name) && s/^"([^"]+)"//)
+      {
+        # Read the value as a string
+        # TODO: Escape sequences?
+        $options{$option_name} = $1;
+        $option_name = undef;
+      }
+      elsif (defined($option_name) && s/^([^;}]+)//)
+      {
+        # Read the value as a bareword
+        # barewords may not contain ';' or '}'
+        $options{$option_name} = $1;
+        $option_name = undef;
+      }
+      elsif (s/^(;)//)
+      {
+        # Option separator
+        die "Internal error" if defined $option_name;
+      }
+      elsif (s/^([^=]+)=//)
+      {
+        # Read the option name and the '=' operator
+        # The option name cannot contain '='
+        $option_name = $1;
+      }
+      else
+      {
+        # Unhandled case, die
+        die "Parse error";
+      }
+    }
+    else
+    {
+      if (s/^({{)//)
+      {
+        # Begin option processing
+        $option_mode = 1;
+      }
+      elsif (s/^({)//)
+      {
+        # A plain '{' in the message
+        print $1;
+      }
+      elsif (s/^([^{]+)//)
+      {
+        # The message
+        print $1;
+      }
+      else
+      {
+        # Unhandled case, die
+        die "Parse error";
+      }
+    }
+  }
+
+  # $/ will be reset to '\n' here
+}
+
+# Remove the special case AUTOBUILD option
+my $autobuild = 1;
+$autobuild = 0 if defined $options{'AUTOBUILD'} && $options{'AUTOBUILD'} eq "no";
+delete $options{'AUTOBUILD'};
+
+# Exit if the user told it not to build
+exit 1 unless $autobuild;
+
+# CCS only generates single file commits for .ccs files
+exit 1 if scalar(keys %files) > 1;
+
+# Directories dont contain any files
+exit 1 if scalar(keys %files) < 1;
+
+# Got a single file commit, is it a .ccs file?
+my ($ccs_file) = keys %files;
+exit 1 unless $ccs_file =~ /\.ccs$/;
+
+my ($fh, $filename) = tempfile( "cvs-autobuild-XXXXXX", DIR => $DIR );
+printf $fh "REPO='%s'\n", $repo;
+printf $fh "FILE='%s'\n", $ccs_file;
+printf $fh "OLD='%s'\n", $files{$ccs_file}{old_version};
+printf $fh "NEW='%s'\n", $files{$ccs_file}{new_version};
+printf $fh "---\n";
+printf $fh "%s='%s'\n", $_, $options{$_} for keys %options;
+close $fh;
+# Mark the file ready by setting the group permissions
+chmod S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP, $filename;
+
+exit 0

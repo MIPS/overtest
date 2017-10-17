@@ -1,0 +1,74 @@
+/******************************************************************************
+*
+*              file : $RCSfile: heron_32m_ldlk.img,v $
+*            author : $Author: mpf $
+* date last revised : $Date: 2009/09/24 15:10:08 $
+*   current version : $Revision: 1.1 $
+*
+*   copyright       : 2005 by Imagination Technologies. All rights reserved.
+*                     No part of this software, either material or conceptual
+*                     may be copied or distributed, transmitted, transcribed,
+*                     stored in a retrieval system or translated into any
+*                     human or computer language in any form by any means,
+*                     electronic, mechanical, manual or otherwise, or
+*                     disclosed to third parties without the express written
+*                     permission of:
+*                       Imagination Technologies, Home Park Estate,
+*                       Kings Langley, Hertfordshire, WD4 8LZ, U.K.
+*
+*       description : Heron Configuration file
+*
+******************************************************************************/
+METAC 2 1
+
+MEMORY coredata ORIGIN 0x82000000 SIZE 0x00001000
+
+MEMORY	sdram		ORIGIN 0xB0000000	SIZE 0x02000000
+MEMORY	FixedMMUTable	ORIGIN 0x02030000	SIZE 0x00080000
+MMU	TABLE	FixedMMUTable	FIXED
+
+ICACHE ENBYPASS LOCAL
+ICACHE ENBYPASS GLOBAL
+
+DCACHE ENBYPASS LOCAL
+DCACHE ENBYPASS GLOBAL
+
+DCACHE SIZE 0x1000
+ICACHE SIZE 0x4000
+
+DCACHE PARTITION  LOCAL  THREAD 0  OFFSET 0x0000 SIZE 0x0800
+DCACHE PARTITION  LOCAL  THREAD 1  OFFSET 0x0800 SIZE 0x0400
+DCACHE PARTITION  GLOBAL           OFFSET 0x0C00 SIZE 0x0400
+
+ICACHE PARTITION  LOCAL  THREAD 0  OFFSET 0x0000 SIZE 0x2000
+ICACHE PARTITION  LOCAL  THREAD 1  OFFSET 0x2000 SIZE 0x1000
+ICACHE PARTITION  GLOBAL           OFFSET 0x3000 SIZE 0x1000
+
+MINIM STRIDE 0x400000
+
+MAP 0x080000 FROM sdram BASE 0xB0880000	         OFFSET 0x0880000
+MAP 0x080000 FROM sdram BASE 0x30880000	THREAD 0 OFFSET 0x0880000
+MAP 0x300000 FROM sdram BASE 0x30C00000	THREAD 0 OFFSET 0x0C00000
+MAP 0x100000 FROM sdram BASE 0x30F00000	THREAD 0 OFFSET 0x0F00000
+MAP 0x400000 FROM sdram BASE 0x31400000	THREAD 0 OFFSET 0x1000000
+MAP 0x400000 FROM sdram BASE 0xB0400000		 OFFSET 0x1400000
+
+GBLHEAP	0x400000	BASE 0xB0400000
+
+EXEC	test0.elf	THREAD 0	CODE 0x30880000	DATA 0x30C00000
+STACK	0x100000	THREAD 0	BASE 0x30F00000
+HEAP	0x400000	THREAD 0	BASE 0x31400000
+
+TBI	BGND	THREAD 0
+TBI	INT	THREAD 0
+TBI	BGND	THREAD 1
+TBI	INT	THREAD 1
+
+MWR 0x04800010 0x00020000
+MWR 0x04801010 0x00020000
+
+MWR 0x04830600 0x0000C0C0
+MWR 0x04830608 0x0000C0C0
+MWR 0x02200000 0x00000000
+
+MWR 0x03000040 0x27

@@ -1,0 +1,5 @@
+*.pyc
+*.log
+testrun_*.py
+.testrun_*
+.*.swp

@@ -1,0 +1,94 @@
+/******************************************************************************
+*
+*              file : $RCSfile: 122_32m_mem.img,v $
+*            author : $Author: mpf $
+* date last revised : $Date: 2009/10/12 13:18:04 $
+*   current version : $Revision: 1.3 $
+*
+*   copyright       : 2005 by Imagination Technologies. All rights reserved.
+*                     No part of this software, either material or conceptual
+*                     may be copied or distributed, transmitted, transcribed,
+*                     stored in a retrieval system or translated into any
+*                     human or computer language in any form by any means,
+*                     electronic, mechanical, manual or otherwise, or
+*                     disclosed to third parties without the express written
+*                     permission of:
+*                       Imagination Technologies, Home Park Estate,
+*                       Kings Langley, Hertfordshire, WD4 8LZ, U.K.
+*
+*       description : Memory regions for METAmorph board
+*
+******************************************************************************/
+
+METAC 1 2
+
+/* 32MB of SDRAM at physical address 0xB0000000 */
+MEMORY sdram    ORIGIN 0xB0000000 SIZE 0x02000000
+
+/* 320K of internal memory at 0xE0000000 */
+MEMORY intram   ORIGIN 0xE0000000 SIZE 0x00050000
+
+/* Internal static MMU table */
+MEMORY internal_mmu ORIGIN 0x02030000 SIZE 0x00010000
+
+/* Core memories  */
+MEMORY corecrom ORIGIN 0x80000000 SIZE 0x20000		/* 128k boot ROMs */
+MEMORY corecode ORIGIN 0x80020000 SIZE 0x10000		/* 64k core code memory */
+MEMORY coredata ORIGIN 0x82000000 SIZE 0x10000		/* 64k core data memory */
+
+/* Configure MMU */
+MMU TABLE 0xB1F00000
+
+/* *************************************************************************** */
+/*                                                                             */
+/*              file : $RCSfile: 122_32m_mem.img,v $                             */
+/*            author : $Author: mpf $                                          */
+/* date last revised : $Date: 2009/10/12 13:18:04 $                            */
+/*   current version : $Revision: 1.3 $                                        */
+/*                                                                             */
+/*   copyright       : 2003 by Imagination Technologies.                       */
+/*                     All rights reserved.                                    */
+/*                     No part of this software, either material or conceptual */
+/*                     may be copied or distributed, transmitted, transcribed, */
+/*                     stored in a retrieval system or translated into any     */
+/*                     human or computer language in any form by any means,    */
+/*                     electronic, mechanical, manual or otherwise, or         */
+/*                     disclosed to third parties without the express written  */
+/*                     permission of:                                          */
+/*                       Imagination Technologies, Home Park Estate,           */
+/*                       Kings Langley, Hertfordshire, WD4 8LZ, U.K.           */
+/*                                                                             */
+/*       description : METAmorph board                                         */
+/*                     Core clock 153.6MHz                                       */
+/*                                                                             */ 
+/* *************************************************************************** */
+
+/* Initialise SDRAM for METAmorph board on chip select 0 */
+MWR 0x020000bc 0x00000001
+MWR 0x020000ac 0x00000001
+MWR 0x02028028 0x00000002
+MWR 0x0202800c 0x0000ced9
+
+/* PLL and SDRAM Settings */
+/*
+MWR 0x02000064 0x00034419
+MPAUSE 200
+MWR 0x02000064 0x00044419
+MPAUSE 200
+MWR 0x02000064 0x80044419
+
+MWR 0x02028010 0x000733A2
+MWR 0x02028014 0x0000041D
+
+MWR 0xB0000000 0x10203040
+*/
+MWR 0x02000064 0x00036C31
+MPAUSE 200
+MWR 0x02000064 0x00046C31
+MPAUSE 200
+MWR 0x02000064 0x80046C31
+MWR 0x02028010 0x00031142
+MWR 0x02028014 0x0000015F
+MWR 0xB0000000 0x10203040
+
+

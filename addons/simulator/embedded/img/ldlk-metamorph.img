@@ -1,0 +1,70 @@
+/******************************************************************************
+*
+*               file : $RCSfile: ldlk-metamorph.img,v $
+*             author : $Author: mpf $
+*  date last revised : $Date: 2010/03/08 15:33:32 $
+*    current version : $Revision: 1.6 $
+*
+*    copyright       : 2002 by Imagination Technologies. All rights reserved.
+*                      No part of this software, either material or conceptual
+*                      may be copied or distributed, transmitted, transcribed,
+*                      stored in a retrieval system or translated into any
+*                      human or computer language in any form by any means,
+*                      electronic, mechanical, manual or otherwise, or
+*                      disclosed to third parties without the express written
+*                      permission of:
+*                        Imagination Technologies, Home Park Estate,
+*                        Kings Langley, Hertfordshire, WD4 8LZ, U.K.
+*
+*        description :
+*
+******************************************************************************/
+
+
+/*METAC 1 2*/
+
+/* Configure MMU */
+MMU TABLE 0xB1F00000
+
+MAP	0x01500000 FROM sdram BASE 0x42000000 THREAD 0 OFFSET 0x00000000
+MAP	0x00100000 FROM sdram BASE 0x60800000 THREAD 0 OFFSET 0x01500000
+MAP	0x00100000 FROM sdram BASE 0x60000000 THREAD 0 OFFSET 0x01600000
+MAP	0x00500000 FROM sdram BASE 0x62000000 THREAD 0 OFFSET 0x01700000
+MAP	0x00010000 FROM sdram BASE 0xc2000000 OFFSET 0x01c00000
+
+
+TBI BGND THREAD 0 CCB 64
+TBI INT THREAD 0 CCB 64
+
+/* Set Cache Size to 16K */
+DCACHE SIZE 0x00004000	
+ICACHE SIZE 0x00004000
+
+/* PARTITION THE CACHE:
+
+   16K of Local  Space for Thread 0
+ */
+
+DCACHE	PARTITION  LOCAL  THREAD 0  OFFSET 0x0000 SIZE 0x4000
+ICACHE	PARTITION  LOCAL  THREAD 0  OFFSET 0x0000 SIZE 0x4000
+
+
+EXEC boot.elf	THREAD 0
+
+STACK 0x20000   THREAD 0 INIT 0
+
+HEAP 0x01500000	BASE 0x42000000 THREAD 0 INIT 0
+
+GBLHEAP 0x1000	         INIT 0
+
+LAYOUT
+{
+0x60000000 THREAD 0 EXEC CODE
+0x62000000 THREAD 0 EXEC DATA
+           THREAD 0 STACK
+0xC2000000 GBLHEAP
+}
+
+OUTPUT boot.ldr
+
+

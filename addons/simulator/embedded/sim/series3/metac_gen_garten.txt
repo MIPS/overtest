@@ -1,0 +1,573 @@
+-- ----------------------------------------------------------------------------
+--
+--                file : $RCSfile: metac_gen_garten.txt,v $
+--        release date : $Date: 2012/12/11 16:15:24 $
+--     release version : $Revision: 1.1 $
+-- release information : $State: Exp $
+--
+--           copyright : 2001-2008 by Imagination Technologies Limited.
+--                               Strictly Confidential
+--                               All rights reserved.
+--                               No part of this hardware description, either
+--                       material or conceptual may be copied or distributed,
+--                       transmitted, transcribed, stored in a retrieval system
+--                       or translated into any human or computer language in
+--                       any form by any means, electronic, mechanical, manual
+--                       or otherwise, or disclosed to third parties without
+--                       the express written permission of Imagination
+--                       Technologies Limited, Home Park Estate, Kings Langley,
+--                       Hertfordshire, WD4 8LZ, U.K.
+--
+-- ----------------------------------------------------------------------------
+
+--{{ Libraries
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+--}}
+
+-- ----------------------------------------------------------------------------
+-- package name: metx_garten_config_pack
+-- purpose: contains all the META core configuration constants
+-- ----------------------------------------------------------------------------
+
+package metx_garten_config_pack is
+
+   -- This chip uses META version:
+   -- V2.1.3 ID 3
+   constant META_MAJOR_REV     : std_logic_vector( 7 downto 0) := "00000010";
+   constant META_MINOR_REV     : std_logic_vector( 7 downto 0) := "00000001";
+   constant META_STEP_REV      : std_logic_vector( 3 downto 0) := "0011";
+   -- Maintenance revision IF bit7:0 of CORE_REV_REG, and META chip ID register
+   -- bottom 8-bits
+   constant META_MAINT_REV     : std_logic_vector( 7 downto 0) := "00000011";
+
+
+   -- ----
+   -- Core
+   -- ----
+   --  1) Number of threads
+   --
+   --    Following settings allowed:
+   --      number of threads settings
+   --      ----------------- --------
+   --      1                 LOG_THREADS=1, NUM_THREADS=1
+   --      2                 LOG_THREADS=1, NUM_THREADS=2**LOG_THREADS
+   --      3                 LOG_THREADS=2, NUM_THREADS=3
+   --      4                 LOG_THREADS=2, NUM_THREADS=2**LOG_THREADS
+   constant LOG_THREADS : integer := 1;
+   constant NUM_THREADS : integer := 2 ** LOG_THREADS;
+
+
+   --  2) Thread capabilities
+   --    In effect signed 4-bit words (+ve has DSP, -ve has no DSP)
+   --
+   --    Following settings allowed:
+   --      DSP_CAPABLE          => thread has DSP capabilities
+   --      SMALL_DSP_CAPABLE    => thread has DSP capabilities but reduced
+   --                              (GP_ONLY size) register set
+   --      BASELINE_DSP_CAPABLE => thread has DSP capabilities including DSP
+   --                              accumulator but reduced (GP_ONLY size + two
+   --                              extra DX regs) register set
+   --      GP_ONLY              => thread does not have DSP capabilities
+   subtype capability_type is std_logic_vector(3 downto 0);
+   constant GP_ONLY              : capability_type := "1100";
+   constant DSP_CAPABLE          : capability_type := "0000";
+   constant SMALL_DSP_CAPABLE    : capability_type := "1000";
+   -- the value of this one is just a placeholder (won't appear in thread
+   -- capabilities field) - the difference between this and SMALL_DSP_CAPABLE
+   -- is shown in DSP_TYPE in the CORE_ID register.
+   constant BASELINE_DSP_CAPABLE : capability_type := "1001";
+
+   type capability_array is array(0 to 4-1) of capability_type;
+
+   -- thread core feature levels
+   constant THREAD_CAPS : capability_array := (GP_ONLY, -- T0
+                                               GP_ONLY, -- T1
+                                               GP_ONLY,     -- T2
+                                               GP_ONLY);    -- T3
+
+
+   --  3) META DSP RAM size and DSP features
+   -- do we have DSP RAM at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DSP_RAM      : integer := 0;
+   -- if so, how big is it?
+   constant DSPRAM_SIZE       : integer := 128*1; -- (for 1 DSP threads:)
+   constant LOG_DSPRAM_SIZE   : integer := 7;     -- (= number of address bits)
+   -- FFT twiddle generator
+   -- (0 = not present, anything else = present)
+   constant GENERATE_FFT_TWID : integer := 0;
+   -- do we have DSP accumulators at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DSP_ACC      : integer := 0;
+   -- if we have Accumulators, do we include global accumulators?
+   -- (0 = not present, anything else = present)
+   constant HAVE_GLOBAL_ACCS  : integer := 0;
+   -- do we have DaOpPaMe templates at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DAOPPAME     : integer := 0;
+   -- do we have hardware loops at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_HW_LOOPS     : integer := 0;
+   -- do we have read pipelines at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_RD_PIPELINE  : integer := 0;
+
+
+   --  4) floating point hardware
+   -- per thread settings
+   --
+   --    Following settings allowed:
+   --      NO_FPU_CAPABILITY => thread does not support hardware floating point
+   --      FPU_CAPABILITY_8  => thread supports hardware floating point with 8 32-bit registers
+   --      FPU_CAPABILITY_16 => thread supports hardware floating point with 16 32-bit registers
+   subtype fpu_capability_type is std_logic_vector(3 downto 0);
+   constant NO_FPU_CAPABILITY : fpu_capability_type := "0000";
+   constant FPU_CAPABILITY_8  : fpu_capability_type := "1000";
+   constant FPU_CAPABILITY_16 : fpu_capability_type := "1111";
+
+   -- thread FPU feature levels
+   constant FPU_THREAD_CAPS : capability_array := (NO_FPU_CAPABILITY,  -- T0
+                                                   NO_FPU_CAPABILITY,  -- T1
+                                                   NO_FPU_CAPABILITY,  -- T2
+                                                   NO_FPU_CAPABILITY); -- T3
+
+   -- set to non-zero for reduced area (single precisiononly) FPU
+   constant REDUCED_FLOATING_POINT  : integer := 0;
+
+
+   --  5) Other miscellaneous META core dialable config options
+   -- do we include global (thread shared) registers in AU and DU?
+   -- (0 = not present, anything else = present)
+   constant HAVE_GLOBAL_REGISTERS : integer := 1;
+   -- (if we have them) how many global DU registers per unit?
+   constant NUM_DU_GLOBAL_REGS    : integer := 0;
+   -- (if we have them) how many global AU registers per unit?
+   constant NUM_AU_GLOBAL_REGS    : integer := 2;
+   -- do we have branch prediction history (if not use static prediction rule)?
+   -- (0 = not present, anything else = present)
+   constant BPH_MASTER_CTRL       : integer := 1;
+   -- do we have a return prediction stack?
+   -- (0 = not present, anything else = present)
+   constant RETSTACK_MASTER_CTRL  : integer := 1;
+   -- and how big is it (2^n)?
+   constant LOG_RETSTACK_SIZE     : integer := 1;
+   -- do we include hardware code breakpoint support at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_BREAKPOINTS      : integer := 1;
+   -- do we include hardware data watchpoint support at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_WATCHPOINTS      : integer := 0;
+   -- do we include full AMA rate control functionality?
+   -- (0 = not present, anything else = present)
+   constant HAVE_AMA              : integer := 0;
+   -- do we include real time trace hardware at all?
+   -- (0 = not present, anything else = present)
+   constant HAVE_REAL_TIME_TRACE  : integer := 0;
+   -- do we include fast interrupt?
+   -- (0 = not present, anything else = present)
+   constant HAVE_FAST_IRQ         : integer := 1;
+   -- do we include data request pipeline freezing?
+   -- (0 = not present, anything else = present)
+   constant HAVE_PIPELINE_FREEZE  : integer := 0;
+   -- do we support the 'QUICKRoT' instructions?
+   -- (0 = not present, anything else = present)
+   constant HAVE_QUICKROT         : integer := 1;
+   -- do we support the 'VEC16' instructions (VADD/VSUB/MORT/VPACK)?
+   -- (0 = not present, anything else = present)
+   constant HAVE_VEC16            : integer := 1;
+   -- do we use one ALU for everything?
+   -- (a trade off between area and performance and need)
+   -- (0 = one 'AU' + one 'DU' present, anything else = one 'ALU')
+   constant HAVE_UNIFIED_ALU      : integer := 0;
+   -- can we route debug (memory) requests through the core?
+   -- (0 = not present, anything else = present)
+   constant HAVE_DEBUG_THRU_CORE  : integer := 1;
+   -- do we include segment MMU?
+   -- (0 = not present, anything else = present)
+   constant HAVE_SEG_MMU          : integer := 1;
+   -- set segment MMU type
+   -- (0 = full segment mmu, 1 = half segment mmu)
+   constant SEG_MMU_TYPE          : integer := 1;
+
+   --  6) META Co-processor ports
+   --   (up to) eight co-processors for write
+   --   (up to) eight co-processors for read
+   type copro_array is array(0 to 8-1) of integer;
+   -- co-processor write port widths
+   --   0             => co-processor write port not used
+   --   anything else => co-processor write port present with width n
+   constant COPRO_WWIDTHS : copro_array := (
+                                            64, -- CP.0 present
+                                             0, -- CP.1 not present
+                                             0, -- CP.2 not present
+                                             0, -- CP.3 not present
+                                             0, -- CP.4 not present
+                                             0, -- CP.5 not present
+                                             0, -- CP.6 not present
+                                             0  -- CP.7 not present
+                                           );
+
+   -- co-processor read port widths
+   --   0             => co-processor read port not used
+   --   anything else => co-processor read port present with width n
+   constant COPRO_RWIDTHS : copro_array := (
+                                            64, -- CP.0 present
+                                             0, -- CP.1 not present
+                                             0, -- CP.2 not present
+                                             0, -- CP.3 not present
+                                             0, -- CP.4 not present
+                                             0, -- CP.5 not present
+                                             0, -- CP.6 not present
+                                             0  -- CP.7 not present
+                                           );
+
+
+   -- --------
+   -- Cache(s)
+   -- --------
+   --  7) cache various options
+   -- Has or no cache
+   constant NO_CACHE        : integer := 0;
+   --
+   -- For cache MMU type of PrivNoMMU
+   --
+   constant CACHE_TYPE      : integer := 3;
+   --
+   -- For a 2 way 4 Kb icache and a 2 way 2 Kb dcache
+   --
+   -- icache and dcache data word size
+   constant CACHE_DW        : integer := 128;
+   -- log2 of icache and dcache data word size/8
+   constant LOG_CACHE_DWB   : integer := 4;
+   -- log2 of number of icache and dcache word in a icache line
+   constant LOG_CACHE_CLW   : integer := 2;
+   -- number of icache ways
+   constant NUM_ICACHE_WAYS : integer := 2;
+   -- log2 of number of icache ways
+   constant LOG_ICACHE_WAYS : integer := 1;
+   -- log2 of per way icache tag RAM depth
+   constant ICACHE_L2L      : integer := 5;
+   -- per way tag icache RAM width
+   constant ICACHE_TW       : integer := 26;
+   -- per way tag icache RAM width rounded up to nearest even number
+   constant ICACHE_TW_RAM   : integer := 26;
+   -- per way tag icache RAM depth
+   constant ICACHE_TD       : integer := 32;
+   -- per way data icache RAM depth
+   constant ICACHE_DD       : integer := 128;
+   -- icache LRU ram(if existed) width
+   constant ICACHE_LRUW     : integer := 1;
+   -- whether dcache supports write through only or also support write back
+   -- 0 for write through only
+   constant DCACHE_MODE     : integer := 1;
+   -- number of dcache ways
+   constant NUM_DCACHE_WAYS : integer := 2;
+   -- log2 of number of dcache ways
+   constant LOG_DCACHE_WAYS : integer := 1;
+   -- log2 of per way dcache tag RAM depth
+   constant DCACHE_L2L      : integer := 4;
+   -- per way tag dcache RAM width
+   constant DCACHE_TW       : integer := 27;
+   -- per way tag dcache RAM width rounded up to nearest even number
+   constant DCACHE_TW_RAM   : integer := 28;
+   -- per way tag dcache RAM depth
+   constant DCACHE_TD       : integer := 16;
+   -- per way data dcache RAM depth
+   constant DCACHE_DD       : integer := 64;
+   -- dcache LRU ram(if existed) width
+   constant DCACHE_LRUW     : integer := 1;
+   -- Global data cache coherency
+   constant GLOBAL_C_COH    : integer := 1;
+   -- dcache per thread write buffer size
+   constant DCACHE_WBD      : integer := 4;
+   -- log2 of dcache per thread write buffer size
+   constant LOG_DCACHE_WBD  : integer := 2;
+   -- icache per thread write buffer size
+   constant ICACHE_WBD      : integer := 2;
+   -- log2 of icache per thread write buffer size
+   constant LOG_ICACHE_WBD  : integer := 1;
+   -- -------------------------------------------------------------------
+   -- materials to describe the hardware cache configuration to software:
+   -- -------------------------------------------------------------------
+   -- core_config2.icache_size
+   constant CONF2_ICACHE_SIZE    : integer := 0;
+   -- core_config2.icache_size_np
+   constant CONF2_ICACHE_SIZE_NP : integer := 0;
+   -- core_config2.icache_small
+   constant CONF2_ICACHE_SMALL   : integer := 0;
+   -- core_config2.dcache_size
+   constant CONF2_DCACHE_SIZE    : integer := 5;
+   -- core_config2.dcache_size_np
+   constant CONF2_DCACHE_SIZE_NP : integer := 0;
+   -- core_config2.dcache_small
+   constant CONF2_DCACHE_SMALL   : integer := 1;
+   -- -------------------------------------------------------------------
+
+   --  8) Icache and Dcache prefetches on or off(1 = on)
+   constant CACHE_RAPF      : integer := 1;
+
+
+   --  9) Number of IC TLB entry per thread
+   constant NUM_IC_TLB_ENTRY_PT      : integer := 8;
+   constant LOG_NUM_IC_TLB_ENTRY_PT  : integer := 3;
+
+
+   -- 10) Number of DC TLB entry per thread
+   constant NUM_DC_TLB_ENTRY_PT      : integer := 8;
+   constant LOG_NUM_DC_TLB_ENTRY_PT  : integer := 3;
+
+
+   -- 11) Number of IC ST entry per thread
+   constant NUM_IC_ST_ENTRY_PT       : integer := 4;
+   constant LOG_NUM_IC_ST_ENTRY_PT   : integer := 2;
+
+
+   -- 12) Number of DC ST entry per thread
+   constant NUM_DC_ST_ENTRY_PT       : integer := 4;
+   constant LOG_NUM_DC_ST_ENTRY_PT   : integer := 2;
+
+
+   -- 13) Size of write combiner write buffer
+   constant WRCOMB_BP     : integer := 1;
+   constant WRCOMB_NLP    : integer := 1;
+
+
+   -- 14) Read Width in 64-bit words out of MMU. (N.B. writes are always 64-bits
+   --     or less which get converted to the right number of bits by an external
+   --     write combiner)
+   --
+   --     Following settings allowed:
+   --       read width    settings
+   --       ----------    --------
+   --       64-bit reads  1
+   --       128-bit reads 2
+   constant NUM_RWORDS : integer := 1;
+
+
+   -- 15) Size of external system register ports
+   constant RG_ADDR_WIDTH_MAX : integer := 23;
+
+   -- 16) External memory output address width
+   constant INT_MEM_ADDR_BUS_WIDTH : integer := 49;
+
+   -- 17) Number of triggers supplied as support IP
+   --
+   --     Following settings allowed:
+   --       number of triggers settings
+   --       ------------------ --------
+   --        8 triggers        NUM_TRIGWORDS=1, NUM_TRIGBITS = 8
+   --       32 triggers        NUM_TRIGWORDS=1, NUM_TRIGBITS = 32
+   --       64 triggers        NUM_TRIGWORDS=2, NUM_TRIGBITS = 64
+   --       96 triggers        NUM_TRIGWORDS=3, NUM_TRIGBITS = 96
+   --       128 triggers       NUM_TRIGWORDS=4, NUM_TRIGBITS = 128
+   constant NUM_TRIGWORDS : integer := 1;
+   constant NUM_TRIGBITS  : integer := 8;
+
+
+   -- 18) External memory page size for write combining and in-page memory arbitration optimisation
+   --     It is the LOG2 of the page byte size, for example 12 = page size of 4kbytes
+   constant MEM_PAGE_SIZE_LOG2  : integer := 12;
+
+
+   -- ----------------
+   -- Config IDs, etc.
+   -- ----------------
+   -- 19) META group ID, bit31:24 of the CORE_ID_REG
+   constant META_GROUP_ID     : std_logic_vector( 7 downto 0) := "00010100";
+
+
+   -- 20) META core ID, bit23:16 of the CORE_ID_REG
+   constant META_CORE_ID      : std_logic_vector( 7 downto 0) := "00011001"; -- META CORE ID = 0x19
+
+
+   -- 21) Designer company ID, bit31:24 of CORE_REV_REG
+   constant META_DESIGNER_REV : std_logic_vector( 7 downto 0) := "00000000";
+
+
+   -- 22) Read data buffer size per thread
+   -- should be set no smaller than the minimum burst size as inferred by value of MEMBUS_RBURST_TYPE
+   constant MEMBUS_RBUF_D_PTH     : integer := 24;
+   constant MEMBUS_RBUF_LOG2D_PTH : integer := 5;
+
+
+   -- --------------------------------------- --
+   -- hardware only internal generic settings --
+   -- --------------------------------------- --
+   -- 23) RAM bypass (bp) settings, known settings include:
+   --     0=Straight Bypass
+   --     1=Maybe register
+   --     2=Always Register
+   --     3=No Bypass
+   --     4=Register with 1/2 flops
+   --     5=Register with 1/4 flops (default)
+   --     6=Similar to 3, except no mux on q(0) out
+   -- These are a trade off between clock speed and RAM testability
+   constant DUAL_PORT_RAM_BYPASS   : integer := 5; -- pre-configured
+   constant SINGLE_PORT_RAM_BYPASS : integer := 5; -- pre-configured
+   -- SLOW_MEMEN_SETTING
+   --   Normally set to 0.  Only set to anything other than 0 for
+   --   technology/vendor combinations that have particularly slow
+   --   on-chip memory enables.
+   constant SLOW_MEMEN_SETTING     : integer := 0; -- pre-configured
+
+
+   -- 24) Clock synchronisers setting
+   --     Following settings allowed:
+   --       1 = clock synchronisers are bypassed
+   --       0 = clock synchronisers are present
+   constant NO_CLOCK_SYNCS    : integer := 1;
+
+
+   -- -------------------------------------------------------------------
+   -- Additional software simulator configuration options
+   --
+   -- Uncomment the constants in this section to use the options in the
+   -- software simulator to override the defaults of 1*64Kb for core code
+   -- memory and 1*64Kb for core data memory.
+   -- -------------------------------------------------------------------
+   -- C1) Spec and size of the Meta Core Code Memory block (if not used set all
+   --    the nums to 0)
+   -- a) ROMs:
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   -- ** If one need to set up the core code/data memory size, use the following configuration
+   --
+   -- so, 13 bits of address is for 64Kb ROMs:
+-- constant LOG_MCCMROM_SIZE : integer := 13;
+-- constant MCCMROM_SIZE     : integer := 2 ** LOG_MCCMROM_SIZE;
+   -- size (number of roms in the block)
+-- constant NUM_MCCM_ROMS    : integer := 0;
+-- constant LOG_MCCM_ROMS    : integer := 0;
+   -- b) RAMs:
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   --
+   -- so, 13 bits of address is for 64Kb RAMs:
+-- constant LOG_MCCMRAM_SIZE : integer := 13;
+-- constant MCCMRAM_SIZE     : integer := 2 ** LOG_MCCMRAM_SIZE;
+   -- size (number of rams in the block)
+-- constant NUM_MCCM_RAMS    : integer := 1;
+-- constant LOG_MCCM_RAMS    : integer := 0;
+   -- c) ROMs and RAMs repeat sizes, etc.
+   -- This is the interval in bits at which the ROM/RAM repeats with the ROM part
+   -- fitting within the first half of this and the RAM part in the second half.
+   --
+   -- so, 13 bits of RAM needs 13 bits here
+-- constant LOG_MCCMRPT_SIZE : integer := 13;
+
+   -- C2) Spec and size of Meta Core Data Memory block (if not used set num to 0)
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   --
+   -- so, 13 bits of address is for 64Kb RAMs:
+-- constant LOG_MCDMRAM_SIZE : integer := 13;
+-- constant MCDMRAM_SIZE     : integer := 2 ** LOG_MCDMRAM_SIZE;
+   -- size (number of rams in the block)
+-- constant NUM_MCDM_RAMS    : integer := 1;
+-- constant LOG_MCDM_RAMS    : integer := 0;
+
+end metx_garten_config_pack;
+
+-- configuring metx_garten as:
+--     2 threads (0 DSP)
+--     (capabilities: GP_ONLY GP_ONLY GP_ONLY GP_ONLY /
+--                    0 DUX global regs, 2 AUX global regs /
+--                    NO_FPU_CAPABILITY NO_FPU_CAPABILITY NO_FPU_CAPABILITY NO_FPU_CAPABILITY)
+--     1 co-processor(s)
+--     4 Kb 128-bit wide ICache (type PrivNoMMU)
+--     2 Kb 128-bit wide DCache (type PrivNoMMU)
+--     (1*64Kb core code RAM in testbench)
+--     (1*64Kb core data RAM in testbench)
+--     8 external hardware triggers
+--     128-bit memory path
+--     49-bit memory address bus (at least in byte terms!)
+--     Single optimised incrementing read burst
+--     ** No DSP and reduced register set **
+--     ** No hardware floating point **
+--     ** No AMA **
+--     ** No data watchpoints **
+--     ** No real time trace **
+-- plus:
+--     JTAG part number 8
+--     META ID  2.1.3.3
+--     META CORE ID 0x19
+-- and:
+--     28 scan chains
+-- ----------------------------------------------------------------------------
+--
+--                file : $RCSfile: metac_gen_garten.txt,v $
+--        release date : $Date: 2012/12/11 16:15:24 $
+--     release version : $Revision: 1.1 $
+-- release information : $State: Exp $
+--
+--           copyright : 2001-2008 by Imagination Technologies Limited.
+--                               Strictly Confidential
+--                               All rights reserved.
+--                               No part of this hardware description, either
+--                       material or conceptual may be copied or distributed,
+--                       transmitted, transcribed, stored in a retrieval system
+--                       or translated into any human or computer language in
+--                       any form by any means, electronic, mechanical, manual
+--                       or otherwise, or disclosed to third parties without
+--                       the express written permission of Imagination
+--                       Technologies Limited, Home Park Estate, Kings Langley,
+--                       Hertfordshire, WD4 8LZ, U.K.
+--
+-- ----------------------------------------------------------------------------
+
+--{{ Libraries
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+--}}
+
+-- ----------------------------------------------------------------------------
+-- package name: metx_garten_user_pack
+-- purpose: contains all the META core user configuration constants
+-- ----------------------------------------------------------------------------
+
+package metx_garten_user_pack is
+
+   -- 1) Log2 of (IP Memory Bus Width/8)
+   -- 4 for bus width of 128
+   -- 3 for bus width of 64
+   -- 2 for bus width of 32
+   constant MEMBUS_BWIDTH_LOG2 : integer := 4;
+
+   -- 2) Master bus thread pre-arbiter burst-breaking mode
+   -- '0' - Pre-arbiter would only switch to a different requestor when the current output burst is completed
+   -- '1' - Pre-arbiter could switch to different requestor every clock cycle
+   constant PARB_BREAK_BURST   : integer := 0;
+
+   -- 3) Master imgbus 3.0 read burst type and mode
+   -- Read burst type options: 0 = single burst, 1 = two bursts, 2 = four bursts
+   -- Read burst mode options: 0 = wrapping burst, 1 = incrementing burst
+   -- Read burst opt options:  0 = unoptimised read burst, 1 = optimised read burst
+
+   -- for bus width of 128, supported options are single wrapping/incrementing unoptimised/optimised burst
+   -- for bus width of  64, supported options are single wrapping/incrementing unoptimised/optimised burst,
+   --                       two incrementing unoptimised/optimised bursts
+   -- for bus width of  32, supported options are single wrapping/incrementing burst,
+   --                       two incrementing unoptimised/optimised bursts,
+   --                       four incrementing unoptimised/optimised bursts
+   constant MEMBUS_RBURST_TYPE : integer := 0;
+   constant MEMBUS_RBURST_MODE : integer := 1;
+   constant MEMBUS_RBURST_OPT  : integer := 1;
+
+   -- 4) Predefined Segment MMU External Bus Address Register Value
+   -- BOOT_ROM_ADDR_1 : configure MMCU_SEGMENT_OUTA1 in segment 6,
+   --                   reset value for upper 32 bit external bus address for boot rom
+   -- EXT_REG_ADDR_0  : configure MMCU_SEGMENT_OUTA0 in segment 15,
+   --                   reset value for lower 32 bit external bus address for external register (bottom 12 bits are not used!)
+   -- EXT_REG_ADDR_1  : configure MMCU_SEGMENT_OUTA1 in segment 15,
+   --                   reset value for upper 32 bit external bus address for external register
+   constant BOOT_ROM_ADDR_1 : std_logic_vector(31 downto 0) := "00000000000000000000011111100001";
+   constant EXT_REG_ADDR_0  : std_logic_vector(31 downto 0) := "00000000000000000000000000000000";
+   constant EXT_REG_ADDR_1  : std_logic_vector(31 downto 0) := "00000000000000010000000000000000";
+
+end metx_garten_user_pack;
+

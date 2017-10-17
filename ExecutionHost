@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# $1 is the name of the host to start
+
+pushd `dirname $0` > /dev/null
+scriptdir=`pwd`
+popd > /dev/null
+
+ulimit -c unlimited
+
+python overtest.py -h "$@"
+exit $?

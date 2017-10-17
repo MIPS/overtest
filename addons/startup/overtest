@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# chkconfig: 35 99 1
+# description: Starts and stops the overtest daemon
+# processname: overtest
+# pidfile:     /var/run/overtest.pid
+
+
+RETVAL=0
+
+OVERTEST_SOURCE="location of overtest source"
+OVERTEST_HOST="name of execution host"
+OVERTEST_USER="name of local unix user"
+OVERTEST_PID=/var/run/overtest.pid
+
+# Source function library.
+. /etc/init.d/functions
+
+case "$1" in
+  start)
+    echo -n "Starting overtest service: "
+    touch $OVERTEST_PID
+    chown $OVERTEST_USER $OVERTEST_PID
+    su - $OVERTEST_USER -c "cd $OVERTEST_SOURCE; p4 sync >& /dev/null"
+    if [ $? -ne 0 ]; then
+      echo -n "Unable to update source"
+      RETVAL=1
+    else
+      daemon --user=$OVERTEST_USER "cd $OVERTEST_SOURCE && ./ExecutionHost '$OVERTEST_HOST' -d -p $OVERTEST_PID"
+    fi
+    echo
+    ;;
+  stop)
+    echo -n "Stopping overtest service: "
+    killproc -p $OVERTEST_PID overtest
+    echo
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop}"
+    RETVAL=1
+esac
+exit $RETVAL
+

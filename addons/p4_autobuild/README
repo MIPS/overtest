@@ -1,0 +1,11 @@
+Overview
+--------
+
+Three main concepts:
+* Watch - a description of a perforce view to watch
+* Subscriber - someone interesting in knowing the results of the build
+* Change - a description of a perforce change
+
+schedule.py is run regularly (nightly) to schedule builds for the new changes.
+
+ovt_bridge.py runs regularly and submits overtest testruns for each scheduled change, waits for the results, and notifies subscribers.

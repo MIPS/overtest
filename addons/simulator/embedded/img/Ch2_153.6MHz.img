@@ -1,0 +1,43 @@
+/* *************************************************************************** */
+/*                                                                             */
+/*              file : $RCSfile: Ch2_153.6MHz.img,v $                             */
+/*            author : $Author: mpf $                                          */
+/* date last revised : $Date: 2009/07/23 13:10:23 $                            */
+/*   current version : $Revision: 1.1 $                                        */
+/*                                                                             */
+/*   copyright       : 2003 by Imagination Technologies.                       */
+/*                     All rights reserved.                                    */
+/*                     No part of this software, either material or conceptual */
+/*                     may be copied or distributed, transmitted, transcribed, */
+/*                     stored in a retrieval system or translated into any     */
+/*                     human or computer language in any form by any means,    */
+/*                     electronic, mechanical, manual or otherwise, or         */
+/*                     disclosed to third parties without the express written  */
+/*                     permission of:                                          */
+/*                       Imagination Technologies, Home Park Estate,           */
+/*                       Kings Langley, Hertfordshire, WD4 8LZ, U.K.           */
+/*                                                                             */
+/*       description : METAmorph board                                         */
+/*                     Core clock 153.6MHz                                       */
+/*                                                                             */ 
+/* *************************************************************************** */
+
+/* Initialise SDRAM for METAmorph board on chip select 0 */
+MWR 0x020000bc 0x00000001
+MWR 0x020000ac 0x00000001
+MWR 0x02028028 0x00000002
+MWR 0x0202800c 0x0000ced9
+
+/* PLL and SDRAM Settings */
+MWR 0x02000064 0x00034419
+MPAUSE 200
+MWR 0x02000064 0x00044419
+MPAUSE 200
+MWR 0x02000064 0x80044419
+
+MWR 0x02028010 0x000733A2
+MWR 0x02028014 0x0000041D
+
+MWR 0xB0000000 0x10203040
+
+

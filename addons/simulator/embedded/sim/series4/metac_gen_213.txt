@@ -1,0 +1,257 @@
+-- ----------------------------------------------------------------------------
+--
+--                file : $RCSfile: metac_2_1_3_2t2d16.txt,v $
+--        release date : $Date: 2010/06/08 13:24:03 $
+--     release version : $Revision: 1.4 $
+-- release information : $State: Exp $
+--
+--           copyright : 2001-2008 by Imagination Technologies Limited.
+--                               Strictly Confidential
+--                               All rights reserved.
+--                               No part of this hardware description, either
+--                       material or conceptual may be copied or distributed,
+--                       transmitted, transcribed, stored in a retrieval system
+--                       or translated into any human or computer language in
+--                       any form by any means, electronic, mechanical, manual
+--                       or otherwise, or disclosed to third parties without
+--                       the express written permission of Imagination
+--                       Technologies Limited, Home Park Estate, Kings Langley,
+--                       Hertfordshire, WD4 8LZ, U.K.
+--
+-- ----------------------------------------------------------------------------
+
+--{{ Libraries
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
+--}}
+
+-- ----------------------------------------------------------------------------
+-- package name: meta_2t2d16_config_pack
+-- purpose: contains all the META core configuration constants
+-- ----------------------------------------------------------------------------
+
+package meta_2t2d16_config_pack is
+
+   -- This chip uses META version:
+   -- V2.1.3 ID 2
+   constant META_MAJOR_REV     : std_logic_vector( 7 downto 0) := "00000010";
+   constant META_MINOR_REV     : std_logic_vector( 7 downto 0) := "00000001";
+   constant META_STEP_REV      : std_logic_vector( 3 downto 0) := "0011";
+   -- Maintenance revision IF bit7:0 of CORE_REV_REG, and META chip ID register bottom 8-bits
+   constant META_MAINT_REV     : std_logic_vector( 7 downto 0) := "00000010";
+
+
+   -- 1) Number of threads
+   --
+   --    Following settings allowed:
+   --      number of threads settings
+   --      ----------------- --------
+   --      2                 LOG_THREADS=1, NUM_THREADS=2**LOG_THREADS
+   --      3                 LOG_THREADS=2, NUM_THREADS=3
+   --      4                 LOG_THREADS=2, NUM_THREADS=2**LOG_THREADS
+   constant LOG_THREADS : integer := 1;
+   constant NUM_THREADS : integer := 2 ** LOG_THREADS;
+
+
+   -- 2) Thread capabilities
+   --    In effect signed 4-bit words (+ve has DSP, -ve has no DSP)
+   --
+   --    Following settings allowed:
+   --      DSP_CAPABLE => thread has DSP capabilities
+   --      GP_ONLY     => thread does not have DSP capabilities
+   subtype capability_type is std_logic_vector(3 downto 0);
+   constant GP_ONLY     : capability_type := "1100";
+   constant DSP_CAPABLE : capability_type := "0000";
+
+   type capability_array is array(0 to 4-1) of capability_type;
+
+   -- thread feature levels
+   constant THREAD_CAPS : capability_array := (DSP_CAPABLE,    -- T0
+                                               DSP_CAPABLE,    -- T1
+                                               GP_ONLY,        -- T2
+                                               GP_ONLY);       -- T3
+
+
+   -- 3) META DSP RAM size and features
+   constant DSPRAM_SIZE       : integer := 128*2; -- (for 2 DSP threads:)
+   constant LOG_DSPRAM_SIZE   : integer := 8;     -- (= number of address bits)
+   -- FFT twiddle generator (0 = not present, 1 = present)
+   constant GENERATE_FFT_TWID : integer := 1;
+
+
+   -- 4) META Co-processor ports
+   --   (up to) eight co-processors for write
+   --   (up to) eight co-processors for read
+   type copro_array is array(0 to 8-1) of integer;
+   -- co-processor write port widths
+   --   0             => co-processor write port not used
+   --   anything else => co-processor write port present with width n
+   constant COPRO_WWIDTHS : copro_array := (
+                                            64, -- CP.0 present
+                                             0, -- CP.1 not present
+                                             0, -- CP.2 not present
+                                             0, -- CP.3 not present
+                                             0, -- CP.4 not present
+                                             0, -- CP.5 not present
+                                             0, -- CP.6 not present
+                                             0  -- CP.7 not present
+                                           );
+
+   -- co-processor read port widths
+   --   0             => co-processor read port not used
+   --   anything else => co-processor read port present with width n
+   constant COPRO_RWIDTHS : copro_array := (
+                                            64, -- CP.0 present
+                                             0, -- CP.1 not present
+                                             0, -- CP.2 not present
+                                             0, -- CP.3 not present
+                                             0, -- CP.4 not present
+                                             0, -- CP.5 not present
+                                             0, -- CP.6 not present
+                                             0  -- CP.7 not present
+                                           );
+
+
+   -- 5) floating point hardware
+   constant HARDWARE_FLOATING_POINT : integer := 0;
+
+
+   -- 6) cache size in kilobytes
+   --
+   --    Following settings allowed:
+   --      size settings
+   --      ---- --------
+   --      10k  CACHE_SIZE=10, CACHE_L2L=6, CACHE_TW=26  ** recommended for two threads
+   --      16k  CACHE_SIZE=16, CACHE_L2L=6, CACHE_TW=26  ** recommended for two or four threads
+   --      32k  CACHE_SIZE=32, CACHE_L2L=7, CACHE_TW=25  ** recommended for four threads
+   constant CACHE_SIZE : integer := 16;
+   constant CACHE_L2L  : integer := 6;
+   constant CACHE_TW   : integer := 26;
+
+
+   -- 7) Size of write combiner write buffer
+   constant WRCOMB_BSIZE : integer := 4;
+
+
+   -- 8) Read Width in 64-bit words out of MMU. (N.B. writes are always 64-bits
+   --    or less which get converted to the right number of bits by an external
+   --    write combiner)
+   --
+   --     Following settings allowed:
+   --       read width    settings
+   --       ----------    --------
+   --       64-bit reads  1
+   --       128-bit reads 2
+   constant NUM_RWORDS : integer := 1;
+
+
+   -- 9) Size of external system register ports
+   constant RG_ADDR_WIDTH_MAX : integer := 23;
+
+
+   -- 10) META post-reset boot state
+   -- 2^boot_count_width gives us the delay before we boot...
+   constant BOOT_COUNTER_WIDTH : integer := 10; -- 10-bits == 1024 clock cycles.
+
+
+   -- 11) Number of triggers supplied as support IP
+   --
+   --     Following settings allowed:
+   --       number of triggers settings
+   --       ------------------ --------
+   --       32 triggers        NUM_TRIGWORDS=1
+   --       64 triggers        NUM_TRIGWORDS=2
+   --       96 triggers        NUM_TRIGWORDS=3
+   --       128 triggers       NUM_TRIGWORDS=4
+   constant NUM_TRIGWORDS : integer := 2;
+
+
+   -- 12) External memory page size for write combining and in-page memory arbitration optimisation
+   --     It is the LOG2 of the page byte size, for example 12 = page size of 4kbytes
+   constant MEM_PAGE_SIZE_LOG2  : integer := 12;
+
+   -- 13) Number of IC TLB entry per thread
+   constant NUM_IC_TLB_ENTRY_PT      : integer := 8;
+   constant LOG_NUM_IC_TLB_ENTRY_PT  : integer := 3;
+
+   -- 14) Number of DC TLB entry per thread
+   constant NUM_DC_TLB_ENTRY_PT      : integer := 8;
+   constant LOG_NUM_DC_TLB_ENTRY_PT  : integer := 3;
+
+   -- 15) Number of IC ST entry per thread
+   constant NUM_IC_ST_ENTRY_PT       : integer := 4;
+   constant LOG_NUM_IC_ST_ENTRY_PT   : integer := 2;
+
+   -- 16) Number of DC ST entry per thread
+   constant NUM_DC_ST_ENTRY_PT       : integer := 4;
+   constant LOG_NUM_DC_ST_ENTRY_PT   : integer := 2;
+
+   -- ----------------
+   -- Config IDs, etc.
+   -- ----------------
+   -- 17) META group ID, bit31:24 of the CORE_ID_REG
+   constant META_GROUP_ID     : std_logic_vector( 7 downto 0) := "00010100";
+
+
+   -- 18) META core ID, bit23:16 of the CORE_ID_REG
+   constant META_CORE_ID      : std_logic_vector( 7 downto 0) := "00000101";
+
+
+   -- 20) Designer company ID, bit31:24 of CORE_REV_REG
+   constant META_DESIGNER_REV : std_logic_vector( 7 downto 0) := "00000000";
+
+
+   -- 21) META core config2 ID, bit18:0 of the CORE_CONFIG2
+   constant META_CORE_CONFIG2 : std_logic_vector(18 downto 0) := "0100101110110000110";
+
+   -- -------------------------------------------------------------------
+   -- Additional software simulator configuration options
+   --
+   -- Uncomment the constants in this section to use the options in the
+   -- software simulator to override the defaults of 1*64Kb for core code
+   -- memory and 1*64Kb for core data memory.
+   -- -------------------------------------------------------------------
+   -- C1) Spec and size of the Meta Core Code Memory block (if not used set all
+   --    the nums to 0)
+   -- a) ROMs:
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   -- ** If one need to set up the core code/data memory size, use the following configuration
+   --
+   -- so, 13 bits of address is for 64Kb ROMs:
+-- constant LOG_MCCMROM_SIZE : integer := 13;
+-- constant MCCMROM_SIZE     : integer := 2 ** LOG_MCCMROM_SIZE;
+   -- size (number of roms in the block)
+-- constant NUM_MCCM_ROMS    : integer := 0;
+-- constant LOG_MCCM_ROMS    : integer := 0;
+   -- b) RAMs:
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   --
+   -- so, 13 bits of address is for 64Kb RAMs:
+-- constant LOG_MCCMRAM_SIZE : integer := 13;
+-- constant MCCMRAM_SIZE     : integer := 2 ** LOG_MCCMRAM_SIZE;
+   -- size (number of rams in the block)
+-- constant NUM_MCCM_RAMS    : integer := 1;
+-- constant LOG_MCCM_RAMS    : integer := 0;
+   -- c) ROMs and RAMs repeat sizes, etc.
+   -- This is the interval in bits at which the ROM/RAM repeats with the ROM part
+   -- fitting within the first half of this and the RAM part in the second half.
+   --
+   -- so, 13 bits of RAM needs 13 bits here
+-- constant LOG_MCCMRPT_SIZE : integer := 13;
+
+   -- C2) Spec and size of Meta Core Data Memory block (if not used set num to 0)
+   -- spec (size and log2 size of each macro used) - each macro is 64-bits wide
+   -- which gives a *8 multiplier
+   --
+   -- so, 13 bits of address is for 64Kb RAMs:
+-- constant LOG_MCDMRAM_SIZE : integer := 13;
+-- constant MCDMRAM_SIZE     : integer := 2 ** LOG_MCDMRAM_SIZE;
+   -- size (number of rams in the block)
+-- constant NUM_MCDM_RAMS    : integer := 1;
+-- constant LOG_MCDM_RAMS    : integer := 0;
+
+end meta_2t2d16_config_pack;

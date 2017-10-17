@@ -1,0 +1,12 @@
+--
+-- Register setup for inscript test run of static test
+--
+
+COM "Loading DNL state <out.dnl>"
+DNL out.dnl
+-- Start thread 0
+WRW :REG_MTX:000000F8 80900000
+WRW :REG_MTX:000000FC 00000005
+POL :REG_MTX:000000FC 80000000 80000000 0
+WRW :REG_MTX:00000000 1
+POL :REG_MTX:00000000 00000000 00000001 0 4294967295

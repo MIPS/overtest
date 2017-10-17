@@ -1,0 +1,153 @@
+import time
+import signal
+from OvertestExceptions import *
+
+class Scheduler:
+  """
+  The scheduler is responsible for the logic in choosing which 
+  test to run from what testrun. It also drives the running of tests.
+  """
+  def __init__(self, host, threadnumber):
+    self.threadnumber = threadnumber
+    self.host = host 
+    self.quit = False
+    self.exitcode = 0
+    signal.signal(signal.SIGTERM, self.termHandler)
+    signal.signal(signal.SIGHUP, self.termHandler)
+
+  def logHelper(self, message):
+    self.host.logHelper(self.threadnumber, message)
+
+  def logDB(self, message):
+    self.host.logDB(self.threadnumber, message)
+
+  def termHandler(self, signum, frame):
+    """
+    Handle a sigterm gracefully
+    """
+    self.quit = True
+    self.exitcode = 2
+    self.logHelper("SIGTERM: Finishing current test and exiting")
+
+  def run(self):
+    """
+    Continuously find and select tests to run.
+    This function must be highly resilient to concurrency issues.
+    """
+    try:
+      nothingToDo = False
+      archiverHadWork = False
+      self.quit = False
+      while not self.quit:
+        if self.host.shouldThreadExit(self.threadnumber):
+          self.logHelper("Thread %u exiting by database request"%self.threadnumber)
+          self.logDB("Thread %u exiting by database request"%self.threadnumber)
+          self.quit = True
+          break
+
+        # Check for 'aborting' testruns, and mark them aborted as appropriate
+        self.host.checkAbortedTestruns()
+
+        # Find all testruns that need archiving
+        # Need a new flag in testrunaction to show when it is archived.
+        testruns = self.host.getTestrunsToArchiveOrDelete(self.logDB)
+        archiverHadWork = False
+        for testrun in testruns:
+          task = True
+          # WORK NEEDED: Put the line below back in after having hte testruntoarchiveordelete to ensure that at least one
+          # task executed on this host (or no host).
+          #archiverHadWork = True
+          # Determine if this is a deletion or an archive
+          # and mark the testrun as archiving or deleting as appropriate
+          (ignoreme, delete) = testrun.setArchiveOrDeleteInProgress()
+          while task != None:
+            # Find a task to archive and mark it as started
+            # This is an atomic operation that uses the testrun table as a LOCK
+            task = testrun.getNextTaskToArchive(self.host.getHostID())
+            if task != None:
+              try:
+                try:
+                  # The task will delete its work directory and perform any custom cleanup
+                  # When deleting it will also delete its results area
+                  task.archiveChecked(delete)
+                except KeyboardInterrupt, e:
+                  testrun.logHelper("Archive interrupted, aborting")
+                  self.logDB("Interrupt received, shutting down")
+                  self.quit = True
+                  raise
+                except Exception, e:
+                  testrun.logHelper("Exception raised, archive code unsafe: A%u.py"%task.actionid)
+                  self.logDB("Exception raised, archive code unsafe: A%u.py\n%s"%(task.actionid, formatExceptionInfo()))
+              finally:
+                testrun.setTaskArchived(task.testrunactionid)
+                del task
+                task = True
+
+          # When the archive is complete the testrun can be marked as archived
+          testrun.archiveComplete()
+          # Testrun is no longer a valid handle (it may have been deleted)
+          testrun = None
+
+        # Find all testruns (in order) that need tasks executing
+        testruns = self.host.getNextTestruns(self.logDB)
+        if not archiverHadWork and (nothingToDo or len(testruns) == 0):
+          time.sleep(5)
+        nothingToDo = True
+        for testrun in testruns:
+          # Find a new task and mark it as started
+          # This is an atomic operation that uses the testrun table as a LOCK
+          task = testrun.getNextTask(self.host.getHostID())
+          if task == None:
+            continue
+          try:
+            nothingToDo = False
+            # Run the task specific actions the runChecked wrapper
+            # handles standard overtest exceptions
+            try:
+              # Wrap the following in a try except block to handle result submission errors
+              # This is to deal with internal consistency. It 'should' only fail if multiple
+              # versions of the same action exist in a testrun!
+              try:
+                if task.runChecked():
+                  testrun.submit(task.actionid, True)
+              except TaskRunErrorException, e:
+                # Assert failure
+                testrun.submit(e.actionid, False)
+                # Abort the whole testrun. Any task failure is a full failure
+                testrun.setAborting(lock = True)
+                testrun.logHelper("Task failed... Testrun aborted")
+              except ResultSubmissionException, e:
+                testrun.submit(task.actionid, False, {"__OVT_EXCEPT__":"Failed to submit result: %s"%formatExceptionInfo()})
+                testrun.logHelper("Task failed to submit result")
+              except TestrunAbortedException, e:
+                testrun.submit(task.actionid, False, {"Aborted":"User abort or another task failed"})
+                testrun.logHelper("Task aborted due to testrun abort")
+              except KeyboardInterrupt, e:
+                testrun.submit(task.actionid, False, {"__OVT_EXCEPT__":"Keyboard interrupt"})
+                testrun.setAborting(lock = True)
+                testrun.logHelper("Run interrupted, aborting")
+                self.logDB("Interrupt received, shutting down")
+                self.quit = True
+                raise
+              except Exception, e:
+                testrun.submit(task.actionid, False, {"__OVT_EXCEPT__":formatExceptionInfo()})
+                testrun.setAborting(lock = True)
+                testrun.logHelper("Exception raised, module run code unsafe: A%u.py"%task.actionid)
+                self.logDB("Exception raised, module run code unsafe: A%u.py\n%s"%(task.actionid, formatExceptionInfo()))
+            except ResultSubmissionException, e:
+              # The task will not get a result which is bad but nothing can be done. It will
+              # be marked as complete below so should not be run in an endless loop
+              # This is a catastrophic testrun failure and suggests inconsistency in the overtest internals
+              testrun.setAborting(lock = True)
+              testrun.logHelper("Failed to submit result for action: %u"%(task.actionid))
+              testrun.logDB("Failed to submit result for action: %u\n%s"%(task.actionid, formatExceptionInfo()))
+          finally:
+            # Mark the task as complete
+            testrun.setTaskEnded(task.testrunactionid)
+            del task
+          # Start from the first testrun again. This permits priority ordering
+          break
+    except KeyboardInterrupt, e:
+      self.logHelper("Scheduler Interrupted. Exiting")
+      sys.exit(1)
+    sys.exit(self.exitcode)

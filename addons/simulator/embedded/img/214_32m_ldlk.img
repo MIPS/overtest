@@ -1,0 +1,57 @@
+/******************************************************************************
+*
+*               file : $RCSfile: 214_32m_ldlk.img,v $
+*             author : $Author: mpf $
+*  date last revised : $Date: 2009/07/31 16:18:44 $
+*    current version : $Revision: 1.2 $
+*
+*    copyright       : 2002 by Imagination Technologies. All rights reserved.
+*                      No part of this software, either material or conceptual
+*                      may be copied or distributed, transmitted, transcribed,
+*                      stored in a retrieval system or translated into any
+*                      human or computer language in any form by any means,
+*                      electronic, mechanical, manual or otherwise, or
+*                      disclosed to third parties without the express written
+*                      permission of:
+*                        Imagination Technologies, Home Park Estate,
+*                        Kings Langley, Hertfordshire, WD4 8LZ, U.K.
+*
+*        description :
+*
+******************************************************************************/
+
+
+METAC 2 1
+MINIM STRIDE 0x01000000
+/* 32Mb layout */
+MAP	0x00080000 FROM sdram THREAD 0 BASE 0x20880000 OFFSET 0x00000000
+MAP	0x00580000 FROM sdram THREAD 0 BASE 0x21000000 OFFSET 0x00080000
+MAP	0x01800000 FROM sdram THREAD 0 BASE 0x61000000 OFFSET 0x00600000
+MAP	0x000E0000 FROM sdram THREAD 0 BASE 0xB1E00000 OFFSET 0x01E00000
+
+TBI BGND THREAD 0 CCB 64
+TBI INT THREAD 0 CCB 64
+
+/* Set Cache Size to 32K */
+DCACHE SIZE 0x00008000	
+ICACHE SIZE 0x00008000
+
+/* PARTITION THE CACHE:
+
+   16K of Local  Space for Thread 0
+   16k of Global
+ */
+DCACHE	PARTITION  LOCAL  THREAD 0  OFFSET 0x0000 SIZE 0x4000
+DCACHE	PARTITION  GLOBAL           OFFSET 0x4000 SIZE 0x4000
+
+ICACHE	PARTITION  LOCAL  THREAD 0  OFFSET 0x0000 SIZE 0x4000
+ICACHE	PARTITION  GLOBAL           OFFSET 0x4000 SIZE 0x4000
+
+EXEC app.elf		THREAD 0 CODE 0x20880000 DATA 0x21000000
+
+STACK 0x10000        THREAD 0 BASE 0x21570000
+
+HEAP 0x01000000	    THREAD 0 BASE 0x61000000 INIT 0
+
+GBLHEAP 0xE0000	     	     BASE 0xB1E00000
+
