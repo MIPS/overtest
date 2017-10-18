@@ -44,6 +44,7 @@ function testrunlist($options)
                 "       to_char(ovt_testrun.completeddate, 'YYYY/MM/DD HH24:MI') AS completeddate,\n".
                 "       to_char(ovt_testrun.startafter, 'YYYY/MM/DD HH24:MI') AS startafter,\n".
                 "       ovt_testrun.description, ovt_user.username, ovt_user.userid, ovt_testrungroup.testrungroupname,\n".
+		"       ovt_testrun.successful,\n".
                 "       ovt_testrungroup.testrungroupid, ovt_runstatus.description AS rundesc, ovt_runstatus.*\n";
   $sql_select_count = "SELECT Count(ovt_testrun.testrunid) As run_count \n";
   $sql_from  =  "FROM ovt_testrun LEFT OUTER JOIN ovt_testrungroup USING (testrungroupid) \n".
@@ -307,7 +308,8 @@ function testrunlist($options)
       }
       if ($tdopts != "")
       {
-        $tropts = "onMouseOut=\"style.backgroundColor='white';style.cursor='default'\" onMouseOver=\"style.backgroundColor='#E1E8EE';\"";
+        $colour = "white";
+        $tropts = "onMouseOut=\"style.backgroundColor='".$colour."';style.cursor='default'\" onMouseOver=\"style.backgroundColor='#E1E8EE';\"";
       }
       echo "<tr id=\"row".$testrunid."\" $tropts>\n";
       echo "<td ".$tdopts."><a name='anchor_$testrunid'></a>$testrunid</td>\n";
@@ -325,7 +327,15 @@ function testrunlist($options)
       {
         echo "<td ".$tdopts.">".pg_fetch_result($result, $i, "createddate")."</td>\n";
       }
-      echo "<td id=\"description".$testrunid."\" ".$tdopts.">".pg_fetch_result($result, $i, "description")."</td>\n";
+      $color = "";
+      if (!pg_field_is_null($result, $i, "successful"))
+      {
+	if (pg_fetch_result($result, $i, "successful") == "t")
+	  $color = "color=\"#1b5e20\"";
+	else
+	  $color = "color=\"#810000\"";
+      }
+      echo "<td id=\"description".$testrunid."\" ".$tdopts."><font $color>".pg_fetch_result($result, $i, "description")."</font></td>\n";
       echo "<td>";
       if (isset($_SESSION['auth_userid']))
       {
