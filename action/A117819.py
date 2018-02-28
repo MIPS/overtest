@@ -21,17 +21,18 @@ class A117819(Action):
   def run(self):
     if self.concurrency == 1:
       self.concurrency = 6
+
     # Execute a command overriding some environment variables
     result = self.execute(command=[CONFIG.git, "clone",
 					       "--reference=/projects/mipssw/git/mips_tool_chain.git",
 					       "--branch=master",
-					       "git://mipssw-mgmt.ba.imgtec.org/mips_tool_chain.git",
+					       "git://dmz-portal.mipstec.com/mips_tool_chain.git",
 					       "mips_tool_chain"])
     if result != 0:
       self.error("Unable to clone repository")
 
     # Now construct the work area
-    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), "git://mipssw-mgmt.ba.imgtec.org")],
+    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), "git://dmz-portal.mipstec.com")],
 			  workdir=os.path.join(self.getWorkPath(), "mips_tool_chain"),
 			  shell=True)
     if result != 0:
@@ -146,11 +147,21 @@ class A117819(Action):
       self.config.setVariable("Toolchain Root", install)
 
     # Unpack the build/host support libraries source
-    options = ["--git_home=git://mipssw-mgmt.ba.imgtec.org",
+    options = ["--git_home=git://dmz-portal.mipstec.com",
 	       "--prefix=/none",
 	       "--jobs=%d" % self.concurrency]
 
+
+    build_qemu = False
+    if self.testrun.getVersion("QEMU") != None and "mingw" not in host_triple:
+      build_qemu = True
+
     components = ["expat", "termcap", "ncurses", "texinfo"]
+    if build_qemu:
+      components.extend(["zlib", "pixman", "libffi", "glib"])
+      if host_triple == "i686-w64-mingw32":
+	components.extend(["libiconv", "gettext"])
+
     source = {}
     for component in components:
       pkg = glob.glob(os.path.join(self.testrun.getSharedPath("Packages"),
@@ -167,7 +178,7 @@ class A117819(Action):
       self.error("Failed to unpack build/host components")
 
     # Build 'build' support libraries for all tools
-    options = ["--git_home=git://mipssw-mgmt.ba.imgtec.org",
+    options = ["--git_home=git://dmz-portal.mipstec.com",
 	       "--prefix=%s" % buildinstall,
 	       "--build=%s" % build,
 	       "--jobs=%d" % self.concurrency]
@@ -180,7 +191,7 @@ class A117819(Action):
 	self.error("Failed to build %s" % component)
 
     # Unpack host support libraries source
-    options = ["--git_home=git://mipssw-mgmt.ba.imgtec.org",
+    options = ["--git_home=git://dmz-portal.mipstec.com",
 	       "--prefix=%s" % hostinstall,
 	       "--build=%s" % build,
 	       "--jobs=%d" % self.concurrency]
@@ -191,10 +202,16 @@ class A117819(Action):
       options.append("--path=%s" % host_path)
 
     components = ["expat", "termcap", "ncurses"]
+    if build_qemu:
+      components.extend(["zlib", "pixman", "libffi"])
+      if host_triple == "i686-w64-mingw32":
+	components.extend(["libiconv", "gettext"])
+      components.append("glib")
 
     # Build host support libraries for GDB
     cmd = ["b/build_toolchain", "build"]
     cmd.extend(options)
+    cmd.append("--hostlibs=%s" % hostinstall)
     for component in components:
       if self.execute(command=[" ".join(cmd + [source[component], component])], shell=True) != 0:
 	self.error("Failed to build %s" % component)
@@ -264,6 +281,9 @@ class A117819(Action):
     options.append("--src=gcc:%s" % gcc)
     gdb = os.path.join(self.testrun.getSharedPath("GDB"), "gdb")
     options.append("--src=gdb:%s" % gdb)
+    if build_qemu:
+      qemu = os.path.join(self.testrun.getSharedPath("QEMU"), "qemu")
+      options.append("--src=qemu:%s" % qemu)
 
     # Determine if this is a new style build where newlib is built as part of
     # the GCC build
@@ -286,8 +306,11 @@ class A117819(Action):
       version_arch = "MIPS"
       if arch == "nanomips":
         version_arch = "nanoMIPS"
-      version_string = "Codescape GNU Tools %s for %s %s %s" % \
-		       (version_name, version_arch, self.config.getVariable("Vendor").upper(), os_string)
+      vendor_string = self.config.getVariable("Vendor").upper()
+      if vendor_string != "":
+	vendor_string += " "
+      version_string = "Codescape GNU Tools %s for %s %s%s" % \
+		       (version_name, version_arch, vendor_string, os_string)
     else:
       version_string = self.config.getVariable("Release Version")
 
@@ -384,9 +407,13 @@ class A117819(Action):
 	self.error("Failed to build smallclib")
 
     # Build GDB with the newly built host libexpat
-    extra_gdb = "--hostlibs=%s" % hostinstall
-    if self.execute(command=[" ".join(cmd + [extra_gdb, "gdb"])], shell=True) != 0:
+    extra_host = "--hostlibs=%s" % hostinstall
+    if self.execute(command=[" ".join(cmd + [extra_host, "gdb"])], shell=True) != 0:
       self.error("Failed to build gdb")
+
+    if build_qemu:
+      if self.execute(command=[" ".join(cmd + [extra_host, "qemu"])], shell=True) != 0:
+	self.error("Failed to build qemu")
 
     # Set the permissions to match release requirements
     if self.execute(command=["chmod", "-R", "o=g", install]) != 0:
