@@ -259,6 +259,27 @@ class Action(Execute):
     self.createDirectory(workpath)
     return workpath
 
+  def getTMPPath(self, nocreate=False):
+    """
+    Get the temporary directory allocated to this action
+
+    :param nocreate: Controls whether to create the folder if it does not exist
+    :type nocreate: boolean
+    :return: Absolute path of the temp area or False if nocreate and the folder
+             does not already exist
+    :rtype: path
+    """
+    if nocreate and self.getLocalPath(nocreate=True) is False:
+      return False
+
+    tmppath = os.path.join(self.getLocalPath(), "tmp")
+    if nocreate and not os.path.exists(tmppath):
+      return False
+
+    self.createDirectory(tmppath)
+    return tmppath
+
+
   def registerLogFile (self, filename, compress = False):
     """
     Register a log file for permanent storage. I.e. it is not subject to removal on archive.
@@ -373,6 +394,16 @@ class Action(Execute):
           # Just ignore it if it fails
           None
 
+      # Delete the temp directory, this is a local path
+      if self.getTMPPath(nocreate=True) is not False:
+        self.execute(workdir="/tmp", command=["rm", "-rf", self.getTMPPath()])
+        # Try to delete the top level local directory
+        try:
+          os.rmdir(self.localtestrunpath)
+        except OSError:
+          # Just ignore it if it fails
+          None
+
       # Delete the shared area
       if self.getSharedPath(nocreate=True):
         self.execute(workdir="/tmp", command=["rm", "-rf", self.getSharedPath()])
@@ -422,6 +453,7 @@ class Action(Execute):
     if self.submissionid != None:
       env['__OVERTEST_SUBMISSION_ID__'] = self.submissionid
       env['PATH'] = sys.path[0]+":"+env['PATH']
+      env['TMPDIR'] = self.getTMPPath()
 
   def getPrefix(self):
     """
