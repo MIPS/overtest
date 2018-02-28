@@ -220,10 +220,9 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
   
-    if self.tot:
-      options['CFLAGS'] = "-msoft-float"
-      t.description = "R6 Linux - BE,N32,SF"
-      test_config.append(deepcopy(t))
+    options['CFLAGS'] = "-msoft-float"
+    t.description = "R6 Linux - BE,N32,SF"
+    test_config.append(deepcopy(t))
   
     options['CFLAGS'] = "-mhard-float"
     t.description = "R6 Linux - BE,N32,HF"
@@ -257,10 +256,9 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
   
-    if self.tot:
-      options['CFLAGS'] = "-msoft-float"
-      t.description = "R6 Linux - BE,N64,SF"
-      test_config.append(deepcopy(t))
+    options['CFLAGS'] = "-msoft-float"
+    t.description = "R6 Linux - BE,N64,SF"
+    test_config.append(deepcopy(t))
   
     options['CFLAGS'] = "-mhard-float"
     t.description = "R6 Linux - BE,N64,HF"
