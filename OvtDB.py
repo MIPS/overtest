@@ -4294,6 +4294,9 @@ class OvtDB:
     if forcetestrunid == None:
       sql = "SELECT testrunid, "+\
             "       deptestrunid, "+\
+	    "       (SELECT testrunid "+\
+	    "        FROM ovt_testrun AS t1 "+\
+	    "        WHERE t1.testrunid=ovt_testrun.deptestrunid) AS depexists, "+\
 	    "       (SELECT successful "+\
 	    "        FROM ovt_testrun AS t1 "+\
 	    "        WHERE t1.testrunid=ovt_testrun.deptestrunid) AS depsuccessful "+\
@@ -4321,9 +4324,9 @@ class OvtDB:
     for testrun in testruns:
       if testrun['deptestrunid'] is not None:
         # There is a producer testrun
-        if testrun['depsuccessful'] is not None:
-	  # The producer testrun has completed
-	  if testrun['depsuccessful'] is False:
+        if testrun['depsuccessful'] is not None or testrun['depexists'] is None:
+	  # The producer testrun has completed or has been deleted
+	  if testrun['depsuccessful'] is False or testrun['depexists'] is None:
             # The producer failed
 	    self.setTestrunRunstatus(testrun['testrunid'], "DEPTESTRUNFAILED")
 	    continue
@@ -4460,7 +4463,7 @@ class OvtDB:
     Adds a new versioned action to a testrun
     """
     status = self.getTestrunRunstatus(testrunid) 
-    if status == "CHECKFAILED" or status == "CREATION" or (autodependency and status=="READYTOCHECK"):
+    if status == "CHECKFAILED" or status == "CREATION" or (autodependency and (status=="READYTOCHECK" or status=="MANUALCHECK")):
       sql = "SELECT testrunactionid "+\
             "FROM ovt_testrunaction "+\
             "WHERE testrunid=%s "+\
