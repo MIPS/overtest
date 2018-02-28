@@ -13,6 +13,8 @@ class A117825(Action):
   def run(self):
     if self.version == "Custom":
       root = self.config.getVariable("Manual QEMU Root")
+    elif self.version == "From Toolchain":
+      root = self.config.getVariable("Toolchain Root")
     else:
       root = os.path.join (r'/home','overtest','mipsworld','simulator','qemu',self.version)
     self.config.setVariable("QEMU Root", root)
