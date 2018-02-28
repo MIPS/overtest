@@ -3,6 +3,7 @@ import glob
 from Action import Action
 from Config import CONFIG
 from parsers.GCC4Regression import GCC4RegressionParser
+import re
 
 # G++ Test
 
@@ -40,10 +41,20 @@ class A117830(Action, GCC4RegressionParser):
 					 "/user/rgi_data2/Verify/CentOS-5/Tcl_8.6.4_x64/root/bin",
 					 dejagnu, os.environ['PATH']])
 
-    if endian == "el":
-      cflags = "-mabi=%s -EL %s" % (abi, cflags)
+    if triple.startswith("nanomips"):
+      if abi == "p32":
+	abi_opt = "-m32"
+      elif abi == "p64":
+	abi_opt = "-m64"
+      else:
+	self.error("unknown abi %s" % abi)
     else:
-      cflags = "-mabi=%s -EB %s" % (abi, cflags)
+      abi_opt = "-mabi=%s" % abi
+
+    if endian == "el":
+      cflags = "%s -EL %s" % (abi_opt, cflags)
+    else:
+      cflags = "%s -EB %s" % (abi_opt, cflags)
 
     cflags = "/%s" % cflags.replace(" ", "/")
 
@@ -52,27 +63,38 @@ class A117830(Action, GCC4RegressionParser):
     if self.version.startswith("QEMU"):
       qemu_root = self.config.getVariable("QEMU Root")
       cpu = self.config.getVariable("CPU")
-      if triple.endswith("linux-gnu"):
+      if triple.endswith("linux-gnu") or triple.endswith("linux-musl"):
         board = "multi-sim"
-        if abi == "32":
+        if abi == "32" or abi == "p32":
 	  suffix = ""
         else:
 	  suffix = abi
-        if endian == "el":
-	  suffix = "%sel" % suffix
-        qemu_exec = os.path.join(qemu_root, "bin", "qemu-mips%s" % suffix)
+	if triple.startswith("nanomips"):
+	  if endian == "eb":
+	    suffix = "%seb" % suffix
+	  qemu_exec = os.path.join(qemu_root, "bin", "qemu-nanomips%s" % suffix)
+	else:
+	  if endian == "el":
+	    suffix = "%sel" % suffix
+	  qemu_exec = os.path.join(qemu_root, "bin", "qemu-mips%s" % suffix)
         env['DEJAGNU_SIM'] = qemu_exec
         env['DEJAGNU_SIM_OPTIONS'] = "-r 4.5.0 -cpu %s" % cpu
         env['DEJAGNU_SIM_GCC'] = gcc_exec
       else:
         board = "generic-sim"
-        if abi == "32":
+        if abi == "32" or abi == "p32":
   	  suffix = ""
         else:
   	  suffix = "64"
-        if endian == "el":
-  	  suffix = "%sel" % suffix
-        qemu_exec = os.path.join(qemu_root, "bin", "qemu-system-mips%s" % suffix)
+	if triple.startswith("nanomips"):
+	  cpu = "nanomips-generic"
+	  if endian == "eb":
+	    suffix = "%seb" % suffix
+	  qemu_exec = os.path.join(qemu_root, "bin", "qemu-system-nanomips%s" % suffix)
+	else:
+	  if endian == "el":
+	    suffix = "%sel" % suffix
+	  qemu_exec = os.path.join(qemu_root, "bin", "qemu-system-mips%s" % suffix)
 	env['DEJAGNU_SIM'] = qemu_exec
 	env['DEJAGNU_SIM_OPTIONS'] = "-cpu %s -semihosting -nographic -kernel" % cpu
 	if abi in ("32", "p32"):
@@ -92,6 +114,9 @@ class A117830(Action, GCC4RegressionParser):
 	board = "mips-sim-mti64_64"
       else:
         self.error("Unknown ABI")
+
+    # Add the HOSTCC and HOSTCFLAGS variables for build programs
+    self.setHostCC(test_installed)
 
     command = [test_installed, "--without-gfortran", "--without-objc", "--without-gcc",
 	       "--with-g++=%s" % gpp_exec,
@@ -115,3 +140,18 @@ class A117830(Action, GCC4RegressionParser):
     summary = self.parse (os.path.join (self.getWorkPath(), "g++.log"))
 
     return self.success(summary)
+
+  def setHostCC(self, test_installed):
+    """
+    Add the HOSTCC and HOSTCFLAGS entried to test_installed if they are missing
+    """
+    with open(test_installed, 'r') as f:
+      lines = list(f)
+    try:
+      lines.index("set HOSTCC \"gcc\"\n")
+    except ValueError, e:
+      index = lines.index("set CFLAGS \"\"\n")
+      lines.insert(index,"set HOSTCC \"gcc\"\n")
+      lines.insert(index,"set HOSTCFLAGS \"\"\n")
+      with open(test_installed, 'w') as f:
+	f.write("".join(lines))
