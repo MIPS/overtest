@@ -23,9 +23,14 @@ class A117820(Action):
                     shell=True) != 0:
       self.error("Failed to configure")
 
-    if self.execute(command=["make", "-j", str(self.concurrency),
-			     "all-binutils", "all-gas", "all-ld"]) != 0:
-      self.error("Failed to build")
+    if target.startswith("nanomips"):
+      if self.execute(command=["make", "-j", str(self.concurrency),
+			       "all-binutils", "all-gas"]) != 0:
+	self.error("Failed to build")
+    else:
+      if self.execute(command=["make", "-j", str(self.concurrency),
+			       "all-binutils", "all-gas", "all-ld"]) != 0:
+	self.error("Failed to build")
 
     self.execute(command=["make", "check-binutils"], env=env)
     self.registerLogFile(os.path.join(self.getWorkPath(), "binutils", "binutils.log"))
@@ -39,11 +44,12 @@ class A117820(Action):
     self.registerLogFile(log)
     self.parseLog(log)
 
-    self.execute(command=["make", "check-ld"], env=env)
-    self.registerLogFile(os.path.join(self.getWorkPath(), "ld", "ld.log"))
-    log = os.path.join(self.getWorkPath(), "ld", "ld.sum")
-    self.registerLogFile(log)
-    self.parseLog(log)
+    if not target.startswith("nanomips"):
+      self.execute(command=["make", "check-ld"], env=env)
+      self.registerLogFile(os.path.join(self.getWorkPath(), "ld", "ld.log"))
+      log = os.path.join(self.getWorkPath(), "ld", "ld.sum")
+      self.registerLogFile(log)
+      self.parseLog(log)
 
     return self.success()
 
