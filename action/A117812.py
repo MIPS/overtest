@@ -51,4 +51,16 @@ class A117812(Action):
     self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
 		 command=["touch", "gcc/testsuite/gcc.dg/cpp/_Pragma3.c"])
 
+    if "override" in self.version:
+      override_list = self.config.getVariable("GCC Override").split(",")
+      for override in override_list:
+	try:
+	  commit, file = override.split(":")
+	except ValueError:
+	  self.error("Unknown override %s"% override)
+	result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
+			      command=[CONFIG.git, "checkout", commit, file])
+	if result != 0:
+	  self.error("Unable to checkout %s:%s" % (commit, file))
+
     return self.success()
