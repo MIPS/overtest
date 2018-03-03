@@ -54,13 +54,19 @@ class A117812(Action):
     if "override" in self.version:
       override_list = self.config.getVariable("GCC Override").split(",")
       for override in override_list:
-	try:
+	if override == "":
+	  continue
+	if ":" in override:
 	  commit, file = override.split(":")
-	except ValueError:
-	  self.error("Unknown override %s"% override)
-	result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
-			      command=[CONFIG.git, "checkout", commit, file])
-	if result != 0:
-	  self.error("Unable to checkout %s:%s" % (commit, file))
+	  result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
+				command=[CONFIG.git, "checkout", commit, file])
+	  if result != 0:
+	    self.error("Unable to checkout %s:%s" % (commit, file))
+	else:
+	  result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
+				command=[CONFIG.git, "cherry-pick", override])
+	  if result != 0:
+	    self.error("Unable to cherry-pick %s" % (override))
+
 
     return self.success()
