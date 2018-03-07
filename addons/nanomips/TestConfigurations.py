@@ -201,3 +201,67 @@ class GPPDejagnuTestConfig(GNUTestConfig):
     components['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = components
     return t
+
+class GOLDTestConfig:
+  def get_p32_elf_configs(self):
+    test_config = []
+    t = self.testDefinition("elf")
+
+    options = {}
+    options['Manual Triple'] = "nanomips-elf"
+    t.config['MIPS Prebuilt'] = options
+
+    t.description = "R6 Bare Metal"
+    test_config.append(deepcopy(t))
+
+    return test_config
+
+  def get_p32_linux_configs(self):
+    test_config = []
+    return test_config
+
+  def testDefinition(self, os_part):
+    t = PrefixedTestrunOptions("GOLD Test")
+
+    t.tasks['MIPS Testing'] = { "GOLD Test" : "Prebuilt" }
+    components = {}
+    components['GOLD'] = "Remote"
+    components['Toolchain Prebuilt'] = "Custom"
+    t.tasks['MIPS Toolchain'] = components
+
+    host_triple = "x86_64-pc-linux-gnu"
+    config = {}
+    config['Host Triple'] = host_triple
+    config['Host Version'] = "4.9.4-centos5"
+    t.config['MIPS Host'] = config
+
+    return t
+
+class GDBTestConfig:
+  def get_p32_elf_configs(self):
+    test_config = []
+    t = self.testDefinition("elf")
+
+    options = {}
+    options['Manual Triple'] = "nanomips-elf"
+    t.config['MIPS Prebuilt'] = options
+
+    t.description = "R6 Bare Metal"
+    test_config.append(deepcopy(t))
+
+    return test_config
+
+  def get_p32_linux_configs(self):
+    test_config = []
+    return test_config
+
+  def testDefinition(self, os_part):
+    t = PrefixedTestrunOptions("GDB Test")
+
+    t.tasks['MIPS Testing'] = { "GDB Test" : "GNUSIM" }
+    components = {}
+    components['GDB'] = "Remote"
+    components['Toolchain Prebuilt'] = "Custom"
+    t.tasks['MIPS Toolchain'] = components
+
+    return t
