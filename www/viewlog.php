@@ -1,5 +1,8 @@
 <?php
   include_once('includes.inc');
+  ini_set('display_errors', '1');
+  error_reporting(E_ALL);
+
   $testrunid = (int)$_REQUEST['testrunid'];
   $versionedactionid = (int)$_REQUEST['versionedactionid'];
   $logname = basename($_REQUEST['log']);

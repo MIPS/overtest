@@ -9,6 +9,9 @@ $colors = array('66cc66','ccccff','FFCCFF','cc33cc','ff3366','cccc99','ffcc33','
 $colors = array('ffffff','ffffff','FFffFF','ffffff','ffffff','ffffff','ffffff','ffffff','FFffff','ffffff','ffffff','ffffff','ffffff','ffffff','ffffff','ffffff','ffffff','ffffff','ffffff');
 global $colors;
 
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
 function ovt_get_action_name($actionid)
 {
   global $ovtDB;
@@ -295,15 +298,23 @@ function resultFilter($resultStability, $resultsInclude, $passmatch, $value)
   }
   return NULL;
 }
-function updateResults(&$result, $testrunid, $resulttestrunid, $value)
+function updateResults(&$result, $rfi, $reid, $testrunid, $resulttestrunid, $value)
 {
+  if (!array_key_exists($rfi, $result))
+  {
+    $result[$rfi] = array();
+  }
+  if (!array_key_exists($reid, $result[$rfi]))
+  {
+    $result[$rfi][$reid] = array();
+  }
   if ($resulttestrunid != $testrunid)
   {
-    $result["reg".$testrunid][$resulttestrunid] = $value;
+    $result[$rfi][$reid]["reg".$testrunid][$resulttestrunid] = $value;
   }
   else
   {
-    $result[$testrunid] = $value;
+    $result[$rfi][$reid][$testrunid] = $value;
   }
 }
 global $timings;
@@ -465,8 +476,7 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
         $allfieldids[] = $rfi;
       }
       $value = $fetcharray['testresultstring'];
-      $resarray[$resultindex][$rfi][$reid] = array();
-      updateResults($resarray[$resultindex][$rfi][$reid], $testrunid, $resulttestrunid, $value);
+      updateResults($resarray[$resultindex], $rfi, $reid, $testrunid, $resulttestrunid, $value);
     }
     if ($options['showextended'] && $fetcharray['irfi'] != NULL && $fetcharray['testresultinteger'] != NULL)
     {
@@ -475,9 +485,8 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
       {
         $allfieldids[] = $rfi;
       }
-      $value = (integer)$fetcharray['testresultinteger'];
-      $resarray[$resultindex][$rfi][$reid] = array();
-      updateResults($resarray[$resultindex][$rfi][$reid], $testrunid, $resulttestrunid, $value);
+      $value = (int)$fetcharray['testresultinteger'];
+      updateResults($resarray[$resultindex], $rfi, $reid, $testrunid, $resulttestrunid, $value);
     }
     if ($options['showextended'] && $fetcharray['frfi'] != NULL && $fetcharray['testresultfloat'] != NULL)
     {
@@ -487,8 +496,7 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
         $allfieldids[] = $rfi;
       }
       $value = (float)$fetcharray['testresultfloat'];
-      $resarray[$resultindex][$rfi][$reid] = array();
-      updateResults($resarray[$resultindex][$rfi][$reid], $testrunid, $resulttestrunid, $value);
+      updateResults($resarray[$resultindex], $rfi, $reid, $testrunid, $resulttestrunid, $value);
     }
     if ($options['showextended'] && $fetcharray['brfi'] != NULL && $fetcharray['testresultboolean'] != NULL)
     {
@@ -498,8 +506,7 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
         $allfieldids[] = $rfi;
       }
       $value = ($fetcharray['testresultboolean'] == "t");
-      $resarray[$resultindex][$rfi][$reid] = array();
-      updateResults($resarray[$resultindex][$rfi][$reid], $testrunid, $resulttestrunid, $value);
+      updateResults($resarray[$resultindex], $rfi, $reid, $testrunid, $resulttestrunid, $value);
     }
 
     if ($resulttestrunid != $testrunid)
@@ -729,13 +736,6 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
       $testrunid = $testrunids[$tr]['testrunid'];
       $reid = $testrunids[$tr]['reid'];
 
-      /* use the first set of results as the basis for deltas. This needs to be configurable eventually */
-      if ($comparereid === NULL)
-      {
-        $comparereid = $reid;
-        $comparetestrunid = $testrunid;
-      }
-
       if (!array_key_exists($reid, $actionarray["pass"]) ||
           (!array_key_exists($testrunid, $actionarray["pass"][$reid]) &&
            !array_key_exists("reg".$testrunid, $actionarray["pass"][$reid])))
@@ -829,6 +829,7 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
   
     for ($j = 0 ; $options['showextended'] && $j < pg_num_rows($allfields) ; $j++)
     {
+      $comparereid = NULL;
       for ($tr = 0 ; $tr < count($testrunids) ; $tr++)
       {
         $testrunid = $testrunids[$tr]['testrunid'];
@@ -845,6 +846,13 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
             array_key_exists($reid, $actionarray[$rfi]) &&
             array_key_exists($testrunid, $actionarray[$rfi][$reid]))
         {
+
+          /* use the first set of results as the basis for deltas. This needs to be configurable eventually */
+          if ($comparereid === NULL)
+          {
+            $comparereid = $reid;
+            $comparetestrunid = $testrunid;
+          }
           if (pg_fetch_result($allfields, $j, "resulttypename") == "boolean")
           {
             if ($actionarray[$rfi][$reid][$testrunid])
@@ -862,8 +870,7 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
                                            || pg_fetch_result($allfields, $j, "resulttypename") == "float")
                                        && array_key_exists($comparereid,$actionarray[$rfi]))
             {
-              $options['output']['escape'](round((($actionarray[$rfi][$reid][$testrunid]
-                                                   - $actionarray[$rfi][$comparereid][$comparetestrunid])
+              $options['output']['escape'](round(($actionarray[$rfi][$reid][$testrunid]
                                                   / $actionarray[$rfi][$comparereid][$comparetestrunid])
                                                   * 100, 2) . "%");
             }

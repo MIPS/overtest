@@ -239,13 +239,13 @@ elseif ($_REQUEST['what'] == "search1")
            "     INNER JOIN ovt_versionedactionconfigoption USING (configoptionid)\n".
            "     INNER JOIN ovt_versionedaction USING (versionedactionid)\n".
            "     INNER JOIN ovt_action USING (actionid)\n".
-           "WHERE ovt_action.testsuiteid='".$_REQUEST['testsuiteid']."'".
-           "AND NOT ovt_configoptiongroup.automatic";
+           "WHERE ovt_action.testsuiteid='".$_REQUEST['testsuiteid']."'";
+//           "AND NOT ovt_configoptiongroup.automatic";
     }
     else
     {
-      $sql .= "\n".
-           "WHERE NOT ovt_configoptiongroup.automatic";
+//      $sql .= "\n".
+//           "WHERE NOT ovt_configoptiongroup.automatic";
     }
     $sql .="\n".
            "ORDER BY ovt_configoptiongroup.configoptiongroupname\n";

@@ -90,7 +90,8 @@
 
   $sql = "SELECT ovt_testrungroup.testrungroupname, ovt_testrun.description AS testrunname,\n".
          "       ovt_runstatus.description AS runstatusdesc, ovt_testrun.userid, ovt_runstatus.*,\n".
-	 "       ovt_testrun.autoarchive, ovt_testrun.usegridengine, ovt_testrun.gridjobid\n".
+	 "       ovt_testrun.autoarchive, ovt_testrun.usegridengine, ovt_testrun.gridjobid,\n".
+	 "       ovt_testrun.successful\n".
          "FROM ovt_testrun INNER JOIN ovt_runstatus USING (runstatusid)\n".
          "     LEFT OUTER JOIN ovt_testrungroup USING (testrungroupid)\n".
          "WHERE testrunid='".$testrunid."'";
@@ -116,11 +117,6 @@
        "</div>\n";
   echo "<div id=\"staticinfo\">\n".
        "This testrun will ";
-  if (pg_fetch_result($result, 0, "autoarchive") == 'f')
-  {
-    echo "not ";
-  }
-  echo "autoarchive";
   if (pg_fetch_result($result, 0, "usegridengine") == 't')
   {
     $jobid = pg_fetch_result($result, 0, "gridjobid");
@@ -129,6 +125,15 @@
     else
       echo " and is running as grid engine job $jobid";
   }
+  else
+  {
+    if (pg_fetch_result($result, 0, "autoarchive") == 'f')
+    {
+      echo "not ";
+    }
+    echo "autoarchive";
+  }
+
   echo "</div>\n";
 
   echo "<div id=\"testrunmap\" style=\"display:none\">\n".

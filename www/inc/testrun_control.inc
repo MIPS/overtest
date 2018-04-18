@@ -2,6 +2,10 @@
 
 function testrun_buttons($testrunid, $owner, $state, $update_callback)
 {
+//    if ($state['successful'] == "t")
+//      echo "<img src=\"images/tick.gif\" alt=\"Successful\">";
+//    else if ($state['successful'] == "f")
+//      echo "<img src=\"images/cross.png\" alt=\"Failed\">";
     echo "<span id=\"gopause".$testrunid."\">";
     if ($owner && ($state['goenabled'] == "t"
                    || $state['checkenabled'] == "t"))

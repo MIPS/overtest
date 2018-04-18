@@ -49,6 +49,33 @@ function draw_testrun($testrunid, $type = "png")
     $gv .= pg_fetch_result($result, $i, "versionedactionid")." [".$hostoptions."];\n";
   }
 
+  $sql = "SELECT t1.successful, t1.description, t1.testrunid\n".
+         "FROM ovt_testrun AS t1 INNER JOIN ovt_testrun AS t2 ON (t1.testrunid=t2.deptestrunid)\n".
+	 "WHERE t2.testrunid='".$_REQUEST['testrunid']."'";
+  $result = pg_query($ovtDB, $sql);
+
+  if (pg_num_rows($result) > 0)
+  {
+    $hostoptions = "shape=box, label=\"".pg_fetch_result($result, 0, "description")."\"";
+    $hostoptions .= ", URL=\"viewtestrun.php?testrunid=".pg_fetch_result($result, 0, "testrunid")."\"";
+    // There is a producer testrun
+    if (!pg_field_is_null($result, 0, "successful"))
+    {
+      if (pg_fetch_result($result, 0, "successful") == "t")
+      {
+        $hostoptions .= ", color=green";
+      }
+      else
+      {
+        $hostoptions .= ", color=red";
+      }
+    }
+    $gv .= "subgraph cluster_1 {\n";
+    $gv .= "label=\"Depends on testrun\";\n";
+    $gv .= "deptestrun [".$hostoptions."];\n";
+    $gv .= "}\n";
+  }
+
   $sql = "SELECT ovt_dependency.versionedactionid, ovt_dependency.versionedactiondep\n".
          "FROM ovt_dependency INNER JOIN ovt_testrunaction AS tr1 ON (tr1.versionedactionid=ovt_dependency.versionedactionid\n".
          "                                                            AND tr1.testrunid='".$_REQUEST['testrunid']."')\n".
