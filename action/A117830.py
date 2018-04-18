@@ -144,6 +144,7 @@ class A117830(Action, GCC4RegressionParser):
   def setHostCC(self, test_installed):
     """
     Add the HOSTCC and HOSTCFLAGS entried to test_installed if they are missing
+    Also unconditionally set the GCC_UNDER_TEST variable
     """
     with open(test_installed, 'r') as f:
       lines = list(f)
@@ -153,5 +154,10 @@ class A117830(Action, GCC4RegressionParser):
       index = lines.index("set CFLAGS \"\"\n")
       lines.insert(index,"set HOSTCC \"gcc\"\n")
       lines.insert(index,"set HOSTCFLAGS \"\"\n")
-      with open(test_installed, 'w') as f:
-	f.write("".join(lines))
+    try:
+      idx = lines.index("set GCC_UNDER_TEST \"${GCC_UNDER_TEST-${prefix}${prefix+/bin/}${target+$target-}gcc}\"\n")
+      lines[idx] = "set GCC_UNDER_TEST \"${prefix}${prefix+/bin/}${target+$target-}gcc\"\n"
+    except ValueError, e:
+      pass
+    with open(test_installed, 'w') as f:
+      f.write("".join(lines))
