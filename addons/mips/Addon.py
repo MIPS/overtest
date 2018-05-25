@@ -79,7 +79,6 @@ class Addon:
         tot = True
       elif o in ("--runlist"):
 	newrunlist = a.split(",")
-	print newrunlist
 	foundnegated = False
 	foundpositive = False
 	for newrun in newrunlist:
@@ -91,6 +90,7 @@ class Addon:
 	  for newrun in newrunlist:
 	    if newrun[1:] in runlist:
 	      runlist.remove(newrun[1:])
+	    print runlist
 	else:
 	  runlist = newrunlist
 
@@ -124,6 +124,7 @@ class Addon:
 	sourcerel = self.getSourceReleaseConfig()
 	self.gridExec(sourcerel)
 	print "created %d - %s" % (sourcerel.testrunid, sourcerel.description)
+      lasttestrunid = None
       for vendor in ["img", "mti"]:
 	if not vendor in self.runlist:
 	  continue
@@ -144,8 +145,11 @@ class Addon:
 	  for build in secondary:
 	    if "cross" in self.runlist:
 	      build.deptestrunid = primary.testrunid
+	    if lasttestrunid != None:
+	      build.deptestrunid = lasttestrunid
 	    build.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
 	    self.gridExec(build)
+	    lasttestrunid = build.testrunid
 	    print "created %d - %s" % (build.testrunid, build.description)
 
 	  tests = []
@@ -180,6 +184,8 @@ class Addon:
 	  for test in tests:
 	    if "cross" in self.runlist:
 	      test.deptestrunid = primary.testrunid
+	    if lasttestrunid != None:
+	      test.deptestrunid = lasttestrunid
 	    test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/user/leeds.tmp/mpf/qemu"
 	    test.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
 	    if len(self.source_tags) > 0:
