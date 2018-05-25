@@ -286,8 +286,8 @@ class Host:
       del self.ovtDB
       import commands
       os.chdir(os.path.dirname(sys.argv[0]))
-      update_result = commands.getstatusoutput('P4CONFIG=.p4conf ' + CONFIG.p4 + " sync")
-      self.log.write(update_result[1])
+      #update_result = commands.getstatusoutput("git fetch")
+      #self.log.write(update_result[1])
       # Close the log manager
       del self.log
 
