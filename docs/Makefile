@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = /user/rgi_data2/Verify/CentOS-3.8-kernel-2.4.21/PythonSphinx_1_0_7/root/bin/sphinx-build
+SPHINXBUILD   = /user/rgi_data2/Verify/CentOS-3/PythonSphinx_1_0_7/root/bin/sphinx-build
 PAPER         =
 BUILDDIR      = _build
 

@@ -1,6 +1,6 @@
 Abstract class to implement resource initialisation
 ===================================================
 
-.. autoclass:: resources.Resource.Resource
+.. autoclass:: resource.Resource.Resource
    :members:
 
