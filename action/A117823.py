@@ -69,6 +69,7 @@ class A117823(Action, GCC4RegressionParser):
         else:
 	  suffix = abi
 	if triple.startswith("nanomips"):
+	  cpu = "nanomips-generic"
 	  if endian == "eb":
 	    suffix = "%seb" % suffix
 	  qemu_exec = os.path.join(qemu_root, "bin", "qemu-nanomips%s" % suffix)

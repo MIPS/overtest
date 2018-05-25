@@ -146,7 +146,7 @@ class Addon:
 	# Iterate over all the relevant testsuites gathering the
 	# test definition and configuration options for each one
 	# testsuites also know what concurrency suits them best
-	use_gnusim = "gnusim" in self.runlist
+	use_gnusim = "gnusim" in self.runlist and os_part != "linux-musl"
 	for testsuite in ["gcc", "g++", "gold", "gdb"]:
 	  if not testsuite in self.runlist:
 	    continue
@@ -290,7 +290,8 @@ class Addon:
 	actions['Toolchain Build'] = "Bare Metal - qemu"
     else:
       actions['Musl'] = "Remote"
-      actions['Toolchain Build'] = "Linux - musl"
+      actions['QEMU'] = "Remote"
+      actions['Toolchain Build'] = "Linux - musl,qemu"
 
     t.tasks['MIPS Toolchain'] = actions
 
@@ -327,13 +328,12 @@ class Addon:
     actions['GCC'] = "Remote"
     actions['GOLD'] = "Remote"
     actions['GDB'] = "Remote"
-    if os_part == "elf":
-      actions['QEMU'] = "Remote"
+    actions['QEMU'] = "Remote"
     actions['Packages'] = "Remote"
     if os_part == "elf":
       actions['Toolchain Build'] = "Bare Metal - Canadian Cross - qemu"
     else:
-      actions['Toolchain Build'] = "Linux - Canadian Cross - musl"
+      actions['Toolchain Build'] = "Linux - Canadian Cross - musl,qemu"
 	
     actions['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = actions

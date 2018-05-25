@@ -125,9 +125,9 @@ class GNUTestConfig:
   
     options['Endian'] = "Little"
   
-    #options['CFLAGS'] = "-msoft-float"
-    #t.description = "R6 Linux - LE,P32,SF"
-    #test_config.append(deepcopy(t))
+    options['CFLAGS'] = "-msoft-float"
+    t.description = "R6 Linux - LE,P32,SF"
+    test_config.append(deepcopy(t))
   
     #options['CFLAGS'] = "-mhard-float"
     #t.description = "R6 Linux - LE,P32,HF"
@@ -173,7 +173,7 @@ class GCCDejagnuTestConfig(GNUTestConfig):
     components['Dejagnu'] = "Remote"
     components['GCC'] = "Remote"
     if not self.use_gnusim:
-      components['QEMU Prebuilt'] = "Custom"
+      components['QEMU Prebuilt'] = "From Toolchain"
     components['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = components
     return t
@@ -197,7 +197,7 @@ class GPPDejagnuTestConfig(GNUTestConfig):
     components['Dejagnu'] = "Remote"
     components['GCC'] = "Remote"
     if not self.use_gnusim:
-      components['QEMU Prebuilt'] = "Custom"
+      components['QEMU Prebuilt'] = "From Toolchain"
     components['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = components
     return t
