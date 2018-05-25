@@ -48,7 +48,7 @@ class Execute:
     self.proccount = 0
     self.archiveMode = False
     self.name = ""
-    self.umask = 007
+    self.umask = 000
     self.commandtags = {}
 
   def createDirectory(self, path):
