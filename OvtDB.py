@@ -468,7 +468,7 @@ class OvtDB:
     success = False
     while not success:
       try:
-        self.ovtDB = dbapi2.connect( host="hhmipssw204.mipstec.com", port=5432, database="overtest", user="overtest", password="overtest")
+        self.ovtDB = dbapi2.connect( host="overtest.mipstec.com", port=5432, database="overtest", user="overtest", password="overtest")
         success = True
       except (socket.error, postgresql.exceptions.OIError, postgresql.exceptions.ConnectionError, \
               postgresql.exceptions.InFailedTransactionError, postgresql.exceptions.AbortTransaction), e:
