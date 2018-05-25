@@ -189,7 +189,7 @@ class Addon:
     else:
       requirements = {}
       opts.resourcerequirements['Execution Host'] = requirements
-    requirements['Shared Filesystem'] = ["LE Cluster"]
+    requirements['Shared Filesystem'] = ["SC Cluster"]
     #opts.usegridengine = True
     opts.autoarchive = True
     # Start immediately 

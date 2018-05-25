@@ -186,7 +186,7 @@ class Addon:
 	      test.deptestrunid = primary.testrunid
 	    if lasttestrunid != None:
 	      test.deptestrunid = lasttestrunid
-	    test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/user/leeds.tmp/mpf/qemu"
+	    test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/scratch/overtest/qemu"
 	    test.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
 	    if len(self.source_tags) > 0:
 	      test.config['MIPS Tools'] = self.source_tags
@@ -206,7 +206,7 @@ class Addon:
     else:
       requirements = {}
       opts.resourcerequirements['Execution Host'] = requirements
-    requirements['Shared Filesystem'] = ["LE Cluster"]
+    requirements['Shared Filesystem'] = ["SC Cluster"]
     #opts.usegridengine = True
     opts.autoarchive = True
     # Start immediately 
