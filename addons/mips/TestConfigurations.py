@@ -292,14 +292,13 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
 
-    if self.tot:
-      options['CFLAGS'] = "-msoft-float -mmicromips"
-      t.description = "R2 Bare Metal - BE,O32,SF,MM"
-      test_config.append(deepcopy(t))
+    options['CFLAGS'] = "-msoft-float -mmicromips"
+    t.description = "R2 Bare Metal - BE,O32,SF,MM"
+    test_config.append(deepcopy(t))
   
-      options['CFLAGS'] = "-mhard-float -mmicromips"
-      t.description = "R2 Bare Metal - BE,O32,HF,MM"
-      test_config.append(deepcopy(t))
+    options['CFLAGS'] = "-mhard-float -mmicromips"
+    t.description = "R2 Bare Metal - BE,O32,HF,MM"
+    test_config.append(deepcopy(t))
   
     options['CFLAGS'] = "-msoft-float"
     t.description = "R2 Bare Metal - BE,O32,SF"
