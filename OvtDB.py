@@ -4299,7 +4299,11 @@ class OvtDB:
 	    "        WHERE t1.testrunid=ovt_testrun.deptestrunid) AS depexists, "+\
 	    "       (SELECT successful "+\
 	    "        FROM ovt_testrun AS t1 "+\
-	    "        WHERE t1.testrunid=ovt_testrun.deptestrunid) AS depsuccessful "+\
+	    "        WHERE t1.testrunid=ovt_testrun.deptestrunid) AS depsuccessful, "+\
+	    "       (SELECT iseditable "+\
+	    "        FROM ovt_testrun AS t1 INNER JOIN ovt_runstatus AS t2 USING (runstatusid) "+\
+	    "        WHERE t1.testrunid=ovt_testrun.deptestrunid "+\
+	    "        AND t1.runstatusid=t2.runstatusid) AS depiseditable "+\
             "FROM ovt_testrun INNER JOIN ovt_runstatus USING (runstatusid) "+\
             "WHERE (ovt_runstatus.status='CHECKED' "+\
 	    "       OR ovt_runstatus.status='CHECKEDGRID') "+\
@@ -4324,6 +4328,10 @@ class OvtDB:
     for testrun in testruns:
       if testrun['deptestrunid'] is not None:
         # There is a producer testrun
+	if testrun['depexists'] is not None and testrun['depiseditable'] is True:
+	  self.setTestrunRunstatus(testrun['testrunid'], "DEPTESTRUNFAILED")
+	  continue
+
         if testrun['depsuccessful'] is not None or testrun['depexists'] is None:
 	  # The producer testrun has completed or has been deleted
 	  if testrun['depsuccessful'] is False or testrun['depexists'] is None:
