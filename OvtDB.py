@@ -1298,7 +1298,7 @@ class OvtDB:
         tmpval[1].append(version['versionedactionid'])
     return retval
 
-  def getTestrunConfiguration(self, testrunid):
+  def getTestrunConfiguration(self, testrunid, automatic = False):
     """
     Returns a structure representing the configuration for a testrun
     """
@@ -1309,9 +1309,11 @@ class OvtDB:
           "FROM ovt_configoptiongroup INNER JOIN ovt_configoption USING (configoptiongroupid) "+\
           "     INNER JOIN ovt_configsetting USING (configoptionid) "+\
           "     LEFT OUTER JOIN ovt_configoptionlookup USING (configoptionlookupid) "+\
-          "WHERE testrunid=%s "+\
-          "AND NOT ovt_configoptiongroup.automatic "+\
-          "ORDER BY configoptiongroupname, configoptionname"
+          "WHERE testrunid=%s "
+    if not automatic:
+      sql += "AND NOT ovt_configoptiongroup.automatic "
+    
+    sql += "ORDER BY configoptiongroupname, configoptionname"
 
     self.execute(sql, (testrunid))
     settings = self.cursor.fetchall()

@@ -28,6 +28,7 @@ class TestrunExporter:
     print "Usage:"
     print "  -i <id>   --testrunid=<id> Specify the testrun"
     print "            --help-sample    Emit a sample file explaining the format"
+    print "            --automatic      Show automatic configuration as well"
     print "  -f <file> --file=<file>    Specify file to write output to"
     sys.exit (exitcode)
 
@@ -66,7 +67,7 @@ class TestrunExporter:
 
   def exportData(self, args):
     try:
-      opts, args = getopt.getopt (args, "i:f:h", ["testrunid=", "file=", "help", "help-sample"])
+      opts, args = getopt.getopt (args, "i:f:h", ["testrunid=", "file=", "automatic", "help", "help-sample"])
     except getopt.GetoptError, e:
       self.usage (2, str(e))
 
@@ -75,6 +76,7 @@ class TestrunExporter:
       sys.exit (4)
 
     testrunid = None
+    automatic_config = False
     yaml_file = sys.stdout
 
     for (o, a) in opts:
@@ -84,6 +86,8 @@ class TestrunExporter:
         except ValueError:
           self.error("Testrun id specified is not numeric: %s" % a)
           sys.exit(1)
+      elif o == "--automatic":
+	automatic_config = True
       elif o in ("-f", "--file"):
         try:
           yaml_file = open(a, "w")
@@ -125,7 +129,7 @@ class TestrunExporter:
         def2[str(definition[0][id]['related'][0][id2]["data"])] = \
           str(definition[0][id]['related'][0][id2]['related'][0][id3]['data'])
 
-    configuration = self.ovtDB.getTestrunConfiguration(testrunid)
+    configuration = self.ovtDB.getTestrunConfiguration(testrunid, automatic=automatic_config)
     yaml_out['configuration'] = []
     for id in configuration[1]:
       def2 = {}
