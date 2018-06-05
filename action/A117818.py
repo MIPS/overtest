@@ -43,5 +43,5 @@ class A117818(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "glibc"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Glibc rev", self.fetchOutput())
+      self.config.setVariable("Glibc rev", self.fetchOutput().strip())
     return self.success()

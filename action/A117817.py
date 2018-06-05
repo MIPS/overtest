@@ -43,5 +43,5 @@ class A117817(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "packages"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Packages rev", self.fetchOutput())
+      self.config.setVariable("Packages rev", self.fetchOutput().strip())
     return self.success()

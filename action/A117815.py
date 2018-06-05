@@ -43,6 +43,6 @@ class A117815(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "binutils"),
 			  command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Binutils rev", self.fetchOutput())
+      self.config.setVariable("Binutils rev", self.fetchOutput().strip())
 
     return self.success()

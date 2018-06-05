@@ -43,5 +43,5 @@ class A117834(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "gold"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("GOLD rev", self.fetchOutput())
+      self.config.setVariable("GOLD rev", self.fetchOutput().strip())
     return self.success()

@@ -47,7 +47,7 @@ class A117819(Action):
     result = self.execute(workdir=os.path.join(self.getWorkPath(), "src", "mips_tool_chain"),
 	                  command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Toolchain Build rev", self.fetchOutput())
+      self.config.setVariable("Toolchain Build rev", self.fetchOutput().strip())
 
     try:
       arch = self.config.getVariable("Architecture")

@@ -43,5 +43,5 @@ class A117813(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "gdb"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("GDB rev", self.fetchOutput())
+      self.config.setVariable("GDB rev", self.fetchOutput().strip())
     return self.success()

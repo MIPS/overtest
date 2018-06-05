@@ -43,5 +43,5 @@ class A117814(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "newlib"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Newlib rev", self.fetchOutput())
+      self.config.setVariable("Newlib rev", self.fetchOutput().strip())
     return self.success()

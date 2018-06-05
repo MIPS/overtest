@@ -43,5 +43,5 @@ class A117835(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "musl"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Musl rev", self.fetchOutput())
+      self.config.setVariable("Musl rev", self.fetchOutput().strip())
     return self.success()

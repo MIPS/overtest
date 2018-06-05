@@ -43,6 +43,6 @@ class A117816(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "dejagnu"),
 	                  command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("Dejagnu rev", self.fetchOutput())
+      self.config.setVariable("Dejagnu rev", self.fetchOutput().strip())
 
     return self.success()

@@ -43,5 +43,5 @@ class A117826(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "uclibc"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("uClibc rev", self.fetchOutput())
+      self.config.setVariable("uClibc rev", self.fetchOutput().strip())
     return self.success()

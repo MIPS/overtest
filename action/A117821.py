@@ -43,5 +43,5 @@ class A117821(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "qemu"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("QEMU rev", self.fetchOutput())
+      self.config.setVariable("QEMU rev", self.fetchOutput().strip())
     return self.success()

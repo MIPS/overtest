@@ -44,7 +44,7 @@ class A117812(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
 	                  command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("GCC rev", self.fetchOutput())
+      self.config.setVariable("GCC rev", self.fetchOutput().strip())
 
     # Don't care if this fails.  It is present to fix a timing issue in checkout
     # where a pragma test is sensitive to time stamps.

@@ -44,5 +44,5 @@ class A117831(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "smallclib"),
                           command=[CONFIG.git, "rev-parse", "HEAD"])
     if result == 0:
-      self.config.setVariable("SmallClib rev", self.fetchOutput())
+      self.config.setVariable("SmallClib rev", self.fetchOutput().strip())
     return self.success()
