@@ -286,8 +286,10 @@ class Host:
       del self.ovtDB
       import commands
       os.chdir(os.path.dirname(sys.argv[0]))
-      #update_result = commands.getstatusoutput("git fetch")
-      #self.log.write(update_result[1])
+      fetch_result = commands.getstatusoutput("git fetch")
+      self.log.write(fetch_result[1])
+      update_result = commands.getstatusoutput("git rebase origin/master")
+      self.log.write(update_result[1])
       # Close the log manager
       del self.log
 
@@ -305,7 +307,7 @@ class Host:
         except OSError:
           pass
       
-      if update_result[0] == 0:
+      if update_result[0] == 0 and fetch_result[0] == 0:
         sys.argv.insert(0, CONFIG.python)
         os.execv(CONFIG.python, sys.argv)
       else:
