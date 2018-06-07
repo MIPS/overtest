@@ -274,7 +274,6 @@ class Addon:
     actions['Binutils'] = "Remote"
     actions['GCC'] = "Remote"
     actions['GDB'] = "Remote"
-    actions['Packages'] = "Remote"
     actions['Newlib'] = "Remote"
     if not self.tot:
       actions['SmallClib'] = "Remote"

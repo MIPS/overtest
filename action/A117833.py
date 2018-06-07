@@ -13,6 +13,7 @@ component_map = {"GCC":"gcc",
 		 "Musl":"musl",
 		 "GOLD":"gold",
 		 "Glibc":"glibc",
+		 "QEMU":"qemu",
 		 "uClibc":"uclibc"}
 
 class A117833(Action):

@@ -238,13 +238,13 @@ class Addon:
     actions['Binutils'] = "Remote"
     actions['GCC'] = "Remote"
     actions['GDB'] = "Remote"
-    actions['Packages'] = "Remote"
     actions['Newlib'] = "Remote"
     if not self.tot:
       actions['SmallClib'] = "Remote"
     actions['GOLD'] = "Remote"
     actions['Musl'] = "Remote"
-    actions['Toolchain Source'] = "All - musl"
+    actions['QEMU'] = "Remote"
+    actions['Toolchain Source'] = "All - musl - qemu"
 
     t.tasks['MIPS Toolchain'] = actions
 
