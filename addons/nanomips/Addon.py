@@ -68,6 +68,7 @@ class Addon:
 	source_tags['SmallClib Branch'] = a
 	source_tags['Packages Branch'] = a
 	source_tags['Dejagnu Branch'] = a
+	source_tags['QEMU Branch'] = a
       elif o in ("--groupname"):
 	groupname = a
       elif o in ("--version"):
