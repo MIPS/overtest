@@ -62,8 +62,8 @@ class Addon:
       elif o in ("--components"):
 	source_tags['Binutils Branch'] = a
 	source_tags['GCC Branch'] = a
-	source_tags['GOLD Branch'] = a
-	source_tags['GDB Branch'] = a
+	source_tags['GOLD Branch'] = a.replace("nanoMIPS-","nanoMIPS-GOLD-")
+	source_tags['GDB Branch'] = a.replace("nanoMIPS-","nanoMIPS-GDB-")
 	source_tags['Newlib Branch'] = a
 	source_tags['SmallClib Branch'] = a
 	source_tags['Packages Branch'] = a
@@ -281,6 +281,7 @@ class Addon:
     actions['GDB'] = "Remote"
     actions['GOLD'] = "Remote"
     actions['Packages'] = "Remote"
+    actions['Dejagnu'] = "Remote"
     if os_part == "elf":
       actions['Newlib'] = "Remote"
       if self.tot:
@@ -331,6 +332,7 @@ class Addon:
     actions['GDB'] = "Remote"
     actions['QEMU'] = "Remote"
     actions['Packages'] = "Remote"
+    actions['Dejagnu'] = "Remote"
     if os_part == "elf":
       actions['Toolchain Build'] = "Bare Metal - Canadian Cross - qemu"
     else:
