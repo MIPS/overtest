@@ -20,7 +20,7 @@ class A117819(Action):
   # Execute the action.
   def run(self):
     if self.concurrency == 1:
-      self.concurrency = 40
+      self.concurrency = 6
 
     # Execute a command overriding some environment variables
     result = self.execute(command=[CONFIG.git, "clone",
