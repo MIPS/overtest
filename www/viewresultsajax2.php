@@ -609,11 +609,15 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
       if (!array_key_exists($testrunid, $actionarray))
       {
         $allresults = false;
-        $mergedata .="_";
+	if ($mergedata != "")
+	  $mergedata .= " | ";
+        $mergedata .= "_";
       }
       else
       {
         $tempresultstate = $actionarray[$testrunid];
+	if ($tempresultstate != "" && $mergedata != "")
+	  $mergedata .= " | ";
         $mergedata .= $tempresultstate;
         if ($resultstate !== NULL && $tempresultstate != $resultstate)
         {
