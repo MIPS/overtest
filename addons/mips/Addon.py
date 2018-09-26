@@ -20,6 +20,7 @@ class Addon:
       opts, args = getopt.getopt(args, "", ["binutils=","gcc=","gdb=","newlib=",
 					    "uclibc=","glibc=","smallclib=",
 					    "gold=", "packages=", "dejagnu=",
+                                            "qemu=",
 					    "components=","groupname=",
 					    "version=","storage=","tot",
 					    "runlist="])
@@ -54,6 +55,8 @@ class Addon:
 	source_tags['GOLD Branch'] = a
       elif o in ("--smallclib"):
 	source_tags['SmallClib Branch'] = a
+      elif o in ("--qemu"):
+	source_tags['QEMU Branch'] = a
       elif o in ("--packages"):
 	source_tags['Packages Branch'] = a
       elif o in ("--dejagnu"):
@@ -282,6 +285,7 @@ class Addon:
     if self.gold:
       actions['GOLD'] = "Remote"
     actions['uClibc'] = "Remote"
+    actions['QEMU'] = "Remote"
     if self.gold:
       actions['Toolchain Source'] = "All"
     else:
@@ -320,6 +324,7 @@ class Addon:
     actions['GDB'] = "Remote"
     if self.gold:
       actions['GOLD'] = "Remote"
+    actions['QEMU'] = "Remote"
     actions['Packages'] = "Remote"
     actions['Dejagnu'] = "Remote"
     if os_part == "elf":
@@ -375,6 +380,7 @@ class Addon:
     if self.gold:
       actions['GOLD'] = "Remote"
     actions['GDB'] = "Remote"
+    actions['QEMU'] = "Remote"
     actions['Packages'] = "Remote"
     actions['Dejagnu'] = "Remote"
     if os_part == "elf":

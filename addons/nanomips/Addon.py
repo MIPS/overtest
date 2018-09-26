@@ -171,7 +171,7 @@ class Addon:
 	  if lasttestrunid != None:
 	    test.deptestrunid = lasttestrunid
 	  if not use_gnusim:
-	    test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/user/leeds.tmp/mpf/qemu"
+	    test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/scratch/overtest/qemu"
 	  test.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
 	  if len(self.source_tags) > 0:
 	    test.config['MIPS Tools'] = self.source_tags
