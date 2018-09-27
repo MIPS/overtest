@@ -385,12 +385,12 @@ class Addon:
     actions['Dejagnu'] = "Remote"
     if os_part == "elf":
       if self.gold:
-	actions['Toolchain Build'] = "Bare Metal - Canadian Cross"
+	actions['Toolchain Build'] = "Bare Metal - Canadian Cross - qemu"
       else:
 	actions['Toolchain Build'] = "Bare Metal - Canadian Cross - nogold"
     else:
       if self.gold:
-	actions['Toolchain Build'] = "Linux - Canadian Cross"
+	actions['Toolchain Build'] = "Linux - Canadian Cross - qemu"
       else:
 	actions['Toolchain Build'] = "Linux - Canadian Cross - nogold"
 	
