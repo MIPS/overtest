@@ -594,7 +594,7 @@ class GCCDejagnuTestConfig(GNUTestConfig):
     components['Dejagnu'] = "Remote"
     components['GCC'] = "Remote"
     if not self.use_gnusim:
-      components['QEMU Prebuilt'] = "Custom"
+      components['QEMU Prebuilt'] = "From Toolchain"
     components['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = components
     return t
@@ -618,7 +618,7 @@ class GPPDejagnuTestConfig(GNUTestConfig):
     components['Dejagnu'] = "Remote"
     components['GCC'] = "Remote"
     if not self.use_gnusim:
-      components['QEMU Prebuilt'] = "Custom"
+      components['QEMU Prebuilt'] = "From Toolchain"
     components['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = components
     return t

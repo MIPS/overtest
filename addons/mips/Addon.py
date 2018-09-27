@@ -287,7 +287,7 @@ class Addon:
     actions['uClibc'] = "Remote"
     actions['QEMU'] = "Remote"
     if self.gold:
-      actions['Toolchain Source'] = "All"
+      actions['Toolchain Source'] = "All - qemu"
     else:
       actions['Toolchain Source'] = "All - nogold"
 
@@ -336,12 +336,12 @@ class Addon:
 	actions['Toolchain Build'] = "Bare Metal - nogold"
       else:
 	actions['SmallClib'] = "Remote"
-	actions['Toolchain Build'] = "Bare Metal"
+	actions['Toolchain Build'] = "Bare Metal - qemu"
     else:
       actions['Glibc'] = "Remote"
       actions['uClibc'] = "Remote"
       if self.gold:
-	actions['Toolchain Build'] = "Linux"
+	actions['Toolchain Build'] = "Linux - qemu"
       else:
 	actions['Toolchain Build'] = "Linux - nogold"
 
