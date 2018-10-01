@@ -315,7 +315,7 @@ class Addon:
     host_triple = "x86_64-pc-linux-gnu"
     config = {}
     config['Host Triple'] = host_triple
-    config['Host Version'] = "4.9.4-centos5"
+    config['Host Version'] = "4.9.4-centos6"
     t.config['MIPS Host'] = config
 
     actions = {}
@@ -367,7 +367,7 @@ class Addon:
     host_triple = "i686-pc-linux-gnu"
     config = {}
     config['Host Triple'] = host_triple
-    config['Host Version'] = "4.9.4-centos5"
+    config['Host Version'] = "4.9.4-centos6"
     t.config['MIPS Host'] = config
 
     config = {}
