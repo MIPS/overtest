@@ -442,16 +442,12 @@ class GNUTestConfig:
       t.description = "R2 Linux - BE,O32,SF,MM"
       test_config.append(deepcopy(t))
   
-      options['CFLAGS'] = "-mhard-float -mmicromips"
-      t.description = "R2 Linux - BE,O32,HF,MM"
+      options['CFLAGS'] = "-mhard-float -mmicromips -mnan=2008"
+      t.description = "R2 Linux - BE,O32,HF,MM,N8"
       test_config.append(deepcopy(t))
 
     options['CFLAGS'] = "-msoft-float"
     t.description = "R2 Linux - BE,O32,SF"
-    test_config.append(deepcopy(t))
-  
-    options['CFLAGS'] = "-mhard-float"
-    t.description = "R2 Linux - BE,O32,HF"
     test_config.append(deepcopy(t))
   
     options['CFLAGS'] = "-mhard-float -mnan=2008"
@@ -464,16 +460,12 @@ class GNUTestConfig:
     t.description = "R2 Linux - LE,O32,SF,MM"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float -mmicromips"
-    t.description = "R2 Linux - LE,O32,HF,MM"
+    options['CFLAGS'] = "-mhard-float -mmicromips -mnan=2008"
+    t.description = "R2 Linux - LE,O32,HF,MM,N8"
     test_config.append(deepcopy(t))
   
     options['CFLAGS'] = "-msoft-float"
     t.description = "R2 Linux - LE,O32,SF"
-    test_config.append(deepcopy(t))
-  
-    options['CFLAGS'] = "-mhard-float"
-    t.description = "R2 Linux - LE,O32,HF"
     test_config.append(deepcopy(t))
   
     options['CFLAGS'] = "-mhard-float -mnan=2008"
