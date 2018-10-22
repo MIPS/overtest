@@ -156,7 +156,7 @@ class A117819(Action):
     if self.testrun.getVersion("QEMU") != None and "mingw" not in host_triple:
       build_qemu = True
 
-    components = ["expat", "termcap", "ncurses", "texinfo"]
+    components = ["expat", "termcap", "ncurses", "texinfo" "make" "bison"]
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi", "glib"])
       if host_triple == "i686-w64-mingw32":
@@ -201,7 +201,7 @@ class A117819(Action):
       options.append("--host=%s" % host_triple)
       options.append("--path=%s" % host_path)
 
-    components = ["expat", "termcap", "ncurses"]
+    components = ["expat", "termcap", "ncurses" "make" "bison"]
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi"])
       if host_triple == "i686-w64-mingw32":
