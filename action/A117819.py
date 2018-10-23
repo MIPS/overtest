@@ -116,7 +116,8 @@ class A117819(Action):
 
     # Set up the location of the newly built tools
     host_path = ":".join([os.path.join(install, "bin"),
-			  os.path.join(buildinstall, "bin")])
+			  os.path.join(buildinstall, "bin"),
+                          os.path.join(hostinstall, "bin")])
 
     # Add in the path of any host compiler specified
     try:
@@ -156,7 +157,11 @@ class A117819(Action):
     if self.testrun.getVersion("QEMU") != None and "mingw" not in host_triple:
       build_qemu = True
 
-    components = ["expat", "termcap", "ncurses", "texinfo" "make" "bison"]
+    components = ["expat", "termcap", "ncurses", "texinfo"]
+    opt_components = []
+    if self.version.startswith("Linux"):
+      opt_components = ["make", "bison"]
+
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi", "glib"])
       if host_triple == "i686-w64-mingw32":
@@ -170,6 +175,15 @@ class A117819(Action):
         self.error("Could not locate %s package" % component)
       source[component] = "--src=%s:%s" % (component, pkg[0])
       options.append(source[component])
+
+    for component in opt_components:
+      pkg = glob.glob(os.path.join(self.testrun.getSharedPath("Packages"),
+				   "packages", "%s*" % component))
+      if len(pkg) != 1:
+        opt_components.remove(component)
+      else:
+        source[component] = "--src=%s:%s" % (component, pkg[0])
+        options.append(source[component])
 
     cmd = ["b/build_toolchain", "update"]
     cmd.extend(options)
@@ -201,7 +215,8 @@ class A117819(Action):
       options.append("--host=%s" % host_triple)
       options.append("--path=%s" % host_path)
 
-    components = ["expat", "termcap", "ncurses" "make" "bison"]
+    components = ["expat", "termcap", "ncurses"]
+    components.extend (opt_components)
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi"])
       if host_triple == "i686-w64-mingw32":
@@ -374,7 +389,7 @@ class A117819(Action):
       if self.version.startswith("Linux"):
 	if self.execute(command=[" ".join(cmd + ["linux_headers"])], shell=True) != 0:
 	  self.error("Failed to build linux_headers")
-	extra_glibc_config = ""
+        extra_glibc_config = "--hostlibs=%s" % hostinstall
 	if "Generic" in self.version:
 	  if self.config.getVariable("Float") == "soft":
 	    extra_glibc_config = "--extra_config_opts=\"--without-fp\""
