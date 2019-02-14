@@ -100,6 +100,12 @@ class A117819(Action):
 	elif re.match("^[0-9]{4}\.[0-9]{2}-[0-9]{2}-trial-[0-9]{1,2}$",
 		    self.config.getVariable("Release Version")) is not None:
 	  foldername = os.path.join(target, self.config.getVariable("Release Version"))
+	elif re.match("^[0-9]{4}\.[0-9]{2}-[0-9]{2}-alpha-[0-9]{1,2}$",
+		    self.config.getVariable("Release Version")) is not None:
+	  foldername = os.path.join(target, self.config.getVariable("Release Version"))
+	elif re.match("^[0-9]{4}\.[0-9]{2}-[0-9]{2}-beta-[0-9]{1,2}$",
+		    self.config.getVariable("Release Version")) is not None:
+	  foldername = os.path.join(target, self.config.getVariable("Release Version"))
 	elif installtgz.endswith(".tar.gz"):
 	  foldername = os.path.basename(installtgz)[0:-7]
 	elif installtgz.endswith(".tgz"):
