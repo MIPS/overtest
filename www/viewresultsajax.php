@@ -222,13 +222,25 @@ function output_table_footer($finalgrouplist, $testrunids, $allfields, $options)
     {
       $mergedata .= ", ";
     }
-    $mergedata .= $tr;
+    $mergedata .= $testrunids[$tr]['testrunid'];
     $mergecount++;
 
     if (count($finalgrouplist) == 0 || $mergecount == $finalgrouplist[$mergegroup])
     {
       $options['output']['begin_header_cell']("testrunnumber", "", $mergecount);
-      $options['output']['escape']($mergedata);
+      $tok = strtok($mergedata, ',');
+
+      $options['output']['begin_hyperlink']("http://overtest.mipstec.com/viewtestrun.php?testrunid=".$tok);
+      $options['output']['escape']($tok);
+      $options['output']['end_hyperlink']();
+
+      for ($tok = strtok(',') ; $tok !== false; $tok = strtok(','))
+      {
+	    $options['output']['escape'](", ");
+            $options['output']['begin_hyperlink']("http://overtest.mipstec.com/viewtestrun.php?testrunid=".$tok);
+	    $options['output']['escape']($tok);
+            $options['output']['end_hyperlink']();
+      }
       $options['output']['end_header_cell']();
       $mergegroup++;
       $mergecount = 0;

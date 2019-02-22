@@ -207,7 +207,7 @@ function output_group_headings($group_json, $testrunids, $options)
 }
 
 /* output the testrun numbers and field names for extended results */
-function output_table_footer($finalgrouplist, $testrunids, $allfields, $options)
+function output_table_footer($finalgrouplist, $testrunids, $testsuiteid, $allfields, $options, $groupsect)
 {
   $options['output']['begin_row']();
   $options['output']['begin_header_cell']("testrunnumber");
@@ -216,7 +216,9 @@ function output_table_footer($finalgrouplist, $testrunids, $allfields, $options)
   $mergecount = 0;
   $mergegroup = 0;
   $mergedata = "";
-  for ($tr = 0 ; $tr < count($testrunids) ; $tr++)
+  $gr = 0;
+  $grcount = 0;
+  for ($tr = 0; $tr < count($testrunids) ; $tr++, $grcount--)
   {
     if ($mergedata != "")
     {
@@ -228,11 +230,36 @@ function output_table_footer($finalgrouplist, $testrunids, $allfields, $options)
     if (count($finalgrouplist) == 0 || $mergecount == $finalgrouplist[$mergegroup])
     {
       $options['output']['begin_header_cell']("testrunnumber", "", $mergecount);
-      $options['output']['escape']($mergedata);
+      $tok = strtok($mergedata, ',');
+      if ($tr !== 0 && $grcount != 0)
+      {
+	    $last = $testrunids[$tr-1]['testrunid'];
+            $options['output']['begin_hyperlink']("http://overtest.mipstec.com/viewresults.php?testsuiteid=".$testsuiteid."&group_terms=[[\"Testrun%20Group\"]]&search_terms=[[\"Testrun\",\"".$last."\"],\"or\",[\"Testrun\",\"".$tok."\"]]");
+	    $options['output']['escape']("<=");
+	    $options['output']['end_hyperlink']();
+	    $options['output']['escape'](" ");
+      }
+
+      $options['output']['begin_hyperlink']("http://overtest.mipstec.com/viewtestrun.php?testrunid=".$tok);
+      $options['output']['escape']($tok);
+      $options['output']['end_hyperlink']();
+      for ($tok = strtok(',') ; $tok !== false; $tok = strtok(','))
+      {
+	    $options['output']['escape'](", ");
+            $options['output']['begin_hyperlink']("http://overtest.mipstec.com/viewtestrun.php?testrunid=".$tok);
+	    $options['output']['escape']($tok);
+            $options['output']['end_hyperlink']();
+      }
       $options['output']['end_header_cell']();
       $mergegroup++;
       $mergecount = 0;
       $mergedata = "";
+    }
+
+    if ($grcount == 0 && $gr < count($groupsect))
+    {
+        $grcount = $groupsect[$gr];
+	$gr++;
     }
   }
   $options['output']['end_row']();
@@ -653,7 +680,9 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
   $timings['tableoutput']['end'] = microtime(true);
   $timings['tableoutput']['extra'] = "";
 
-  output_table_footer($finalgrouplist, $testrunids, $allfields, $options);
+  $groupsect = array();
+  $groupsect = $grouplists[count($grouplists)-2];
+  output_table_footer($finalgrouplist, $testrunids, $testsuiteid, $allfields, $options, $groupsect);
 
   $options['output']['end_table']();
 

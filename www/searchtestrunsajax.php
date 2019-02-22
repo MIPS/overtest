@@ -479,8 +479,13 @@ elseif ($_REQUEST['what'] == "search3")
          "<option selected></option>\n";
     for ($i = 0 ; $i < pg_num_rows($result) ; $i++)
     {
+	$res = pg_fetch_result($result, $i, "description");
+	if (strlen($res) > 100)
+	{
+	   $res = substr($res,0,100) . "...";
+	}
       echo "<option value=\"".pg_fetch_result($result, $i, "testrunid")."\">".
-           substr(pg_fetch_result($result, $i, "description"),0,30)."...</option>\n";
+           $res."</option>\n";
     }
     echo "</select>\n";
     break;
