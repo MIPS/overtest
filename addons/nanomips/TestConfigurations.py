@@ -132,6 +132,18 @@ class GNUTestConfig:
     #options['CFLAGS'] = "-mhard-float"
     #t.description = "R6 Linux - LE,P32,HF"
     #test_config.append(deepcopy(t))
+
+    options['CFLAGS'] = "-msoft-float -fpic"
+    t.description = "R6 Linux - LE,P32,SF,pic"
+    test_config.append(deepcopy(t))
+
+    options['CFLAGS'] = "-msoft-float -mcmodel=medium -fpic"
+    t.description = "R6 Linux - LE,P32,SF,MED,pic"
+    test_config.append(deepcopy(t))
+
+    options['CFLAGS'] = "-msoft-float -mcmodel=large -fPIC"
+    t.description = "R6 Linux - LE,P32,SF,LRG,PIC"
+    test_config.append(deepcopy(t))
   
     return test_config
   
