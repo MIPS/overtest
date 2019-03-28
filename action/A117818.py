@@ -17,7 +17,7 @@ class A117818(Action):
     branch = self.config.getVariable("Glibc Branch")
     remote = self.config.getVariable("Glibc Remote")
     # Execute a command overriding some environment variables
-    for i in range(3):
+    for i in range(30):
       result = self.execute(workdir=self.getSharedPath(),
 			    command=[CONFIG.git, "clone",
 						 "--reference=/projects/mipssw/git/glibc.git",
@@ -26,7 +26,7 @@ class A117818(Action):
       if result == 0:
 	break
       else:
-	time.sleep(random.randint(1,10))
+	time.sleep(random.randint(1,30))
 
     if result != 0:
       self.error("Unable to clone repository")

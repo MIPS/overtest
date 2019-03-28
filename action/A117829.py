@@ -18,11 +18,17 @@ class A117829(Action):
   # Execute the action.
   def run(self):
     # Execute a command overriding some environment variables
-    result = self.execute(command=[CONFIG.git, "clone",
-					       "--reference=/projects/mipssw/git/mips_tool_chain.git",
-					       "--branch=master",
-					       "git://mipssw-mgmt.ba.imgtec.org/mips_tool_chain.git",
-					       "mips_tool_chain"])
+    for i in range(30):
+      result = self.execute(command=[CONFIG.git, "clone",
+                                     "--reference=/projects/mipssw/git/mips_tool_chain.git",
+                                     "--branch=master",
+                                     "git://mipssw-mgmt.ba.imgtec.org/mips_tool_chain.git",
+                                     "mips_tool_chain"])
+      if result == 0:
+	break
+      else:
+	time.sleep(random.randint(1,30))
+
     if result != 0:
       self.error("Unable to clone repository")
 

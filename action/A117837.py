@@ -19,11 +19,17 @@ class A117837(Action):
     triple = self.config.getVariable("Triple")
     toolchain_root = self.config.getVariable("Toolchain Root")
     # Execute a command overriding some environment variables
-    result = self.execute(command=[CONFIG.git, "clone",
-					       "--reference=/projects/mipssw/git/mips_tool_chain.git",
-					       "--branch=master",
-					       "git://dmz-portal.mipstec.com/mips_tool_chain.git",
-					       "mips_tool_chain"])
+    for i in range(30):
+      result = self.execute(command=[CONFIG.git, "clone",
+                                     "--reference=/projects/mipssw/git/mips_tool_chain.git",
+                                     "--branch=master",
+                                     "git://dmz-portal.mipstec.com/mips_tool_chain.git",
+                                     "mips_tool_chain"])
+      if result == 0:
+	break
+      else:
+	time.sleep(random.randint(1,30))
+
     if result != 0:
       self.error("Unable to clone repository")
 
