@@ -20,7 +20,10 @@ class A117819(Action):
   # Execute the action.
   def run(self):
     if self.concurrency == 1:
-      self.concurrency = 12
+      if hasattr(CONFIG,'cores'):
+        self.concurrency = CONFIG.cores
+      else:
+        self.concurrency = 12
 
     # Execute a command overriding some environment variables
     for i in range(30):

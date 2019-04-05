@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import time
+import random
 import gzip
 
 from Config import CONFIG
@@ -334,6 +335,42 @@ class Action(Execute):
     :rtype: boolean
     """
     None
+
+  # Execute the action.
+  def gitFetch(self, reponame):
+    """
+    The generic logic to clone a branch from a GIT repo
+    """
+    branch = self.config.getVariable(self.name + " Branch")
+    remote = self.config.getVariable(self.name + " Remote")
+    gitCmd = [CONFIG.git, "clone",
+              "--reference=/projects/mipssw/git/" + reponame,
+              "-b", branch, "--depth", "1",
+              remote,
+              self.name.lower()]
+
+    # Execute a command overriding some environment variables
+    for i in range(30):
+      result = self.execute(workdir=self.getSharedPath(),
+			    command=gitCmd)
+      if result == 0:
+	break
+      else:
+	time.sleep(random.randint(1,30))
+
+    if result != 0:
+      self.error("Unable to clone repository")
+
+
+    result = self.execute(workdir=os.path.join(self.getSharedPath(), self.name.lower()),
+			  command=[CONFIG.git, "config", "core.preloadIndex", "false"])
+
+    result = self.execute(workdir=os.path.join(self.getSharedPath(), self.name.lower()),
+	                  command=[CONFIG.git, "rev-parse", "HEAD"])
+    if result == 0:
+      self.config.setVariable(self.name + " rev", self.fetchOutput().strip())
+
+    return self.success()
 
   def getVersion(self, actionname=None):
     """
