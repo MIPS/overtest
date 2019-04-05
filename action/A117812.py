@@ -31,7 +31,7 @@ class A117812(Action):
     # Execute a command overriding some environment variables
     for i in range(30):
       result = self.execute(workdir=self.getSharedPath(),
-			    gitCmd)
+			    command=gitCmd)
       if result == 0:
 	break
       else:

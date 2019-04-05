@@ -17,7 +17,7 @@ class A117813(Action):
   def run(self):
     branch = self.config.getVariable("GDB Branch")
     remote = self.config.getVariable("GDB Remote")
-    command=[CONFIG.git, "clone",
+    gitCmd=[CONFIG.git, "clone",
              "--reference=/projects/mipssw/git/binutils-gdb.git",
              remote,
              "gdb"]
@@ -26,11 +26,11 @@ class A117813(Action):
     gitversion = self.fetchOutput().replace("git version ","")
     singleBranch = LooseVersion(gitversion) >= LooseVersion('1.7.10')
     if singleBranch:
-      command += ["--single-branch", "-b", branch]
+      gitCmd += ["--single-branch", "-b", branch]
 
     # Execute a command overriding some environment variables
     for i in range(30):
-      result = self.execute(workdir=self.getSharedPath(), command)
+      result = self.execute(workdir=self.getSharedPath(), command = gitCmd)
       if result == 0:
 	break
       else:
