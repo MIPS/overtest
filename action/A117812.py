@@ -3,6 +3,7 @@ from Action import Action
 from Config import CONFIG
 import time
 import random
+from distutils.version import LooseVersion
 
 # GCC
 
@@ -16,13 +17,21 @@ class A117812(Action):
   def run(self):
     branch = self.config.getVariable("GCC Branch")
     remote = self.config.getVariable("GCC Remote")
+    gitCmd = [CONFIG.git, "clone",
+              "--reference=/projects/mipssw/git/gcc.git",
+              remote,
+              "=gcc"]
+    result = self.execute(workdir=self.getSharedPath(),
+                          command=[CONFIG.git, "--version"])
+    gitversion = self.fetchOutput().replace("git version ","")
+    singleBranch = LooseVersion(gitversion) >= LooseVersion('1.7.10')
+    if singleBranch:
+      gitCmd += ["--single-branch", "-b", branch]
+
     # Execute a command overriding some environment variables
     for i in range(30):
       result = self.execute(workdir=self.getSharedPath(),
-			    command=[CONFIG.git, "clone",
-						 "--reference=/projects/mipssw/git/gcc.git",
-						 remote,
-						 "gcc"])
+			    gitCmd)
       if result == 0:
 	break
       else:
@@ -35,11 +44,12 @@ class A117812(Action):
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
 			  command=[CONFIG.git, "config", "core.preloadIndex", "false"])
 
-    result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
-			  command=[CONFIG.git, "checkout", branch])
+    if not singleBranch:
+      result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
+                            command=[CONFIG.git, "checkout", branch])
 
-    if result != 0:
-      self.error("Unable to checkout branch")
+      if result != 0:
+        self.error("Unable to checkout branch")
 
     result = self.execute(workdir=os.path.join(self.getSharedPath(), "gcc"),
 	                  command=[CONFIG.git, "rev-parse", "HEAD"])
