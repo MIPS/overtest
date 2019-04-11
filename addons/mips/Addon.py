@@ -4,7 +4,8 @@ import os
 from TestrunEditing import TestrunEditing, TestrunOptions
 from copy import deepcopy
 from OvertestExceptions import *
-from TestConfigurations import GCCDejagnuTestConfig, GPPDejagnuTestConfig
+from TestConfigurations import GCCDejagnuTestConfig, GPPDejagnuTestConfig,\
+                                GASTestConfig
 
 class Addon:
   def __init__(self, ovtDB):
@@ -36,7 +37,7 @@ class Addon:
     groupname=None
     tot=False
     gold=True
-    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,g++,gcc,binutils".split(",")
+    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,g++,gcc,binutils,gas".split(",")
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -160,7 +161,7 @@ class Addon:
 	  # Iterate over all the relevant testsuites gathering the
 	  # test definition and configuration options for each one
 	  # testsuites also know what concurrency suits them best
-	  for testsuite in ["gcc", "g++"]:
+	  for testsuite in ["gcc", "g++", "gas"]:
 	    if not testsuite in self.runlist:
 	      continue
 	    use_gnusim = "gnusim" in self.runlist
@@ -168,23 +169,32 @@ class Addon:
 	      testconfigs = GCCDejagnuTestConfig(use_gnusim)
 	    elif testsuite == "g++":
 	      testconfigs = GPPDejagnuTestConfig(use_gnusim)
+	    elif testsuite == "gas":
+	      testconfigs = GASTestConfig()
 	    testconfigs.tot = self.tot
-	    if vendor == "img" and os_part == "linux-gnu":
-	      tests.extend(testconfigs.get_r6_o32_linux_configs())
-	      tests.extend(testconfigs.get_r6_n32_linux_configs())
-	      tests.extend(testconfigs.get_r6_n64_linux_configs())
-	    elif vendor == "mti" and os_part == "linux-gnu":
-	      tests.extend(testconfigs.get_r2_o32_linux_configs())
-	      tests.extend(testconfigs.get_r2_n32_linux_configs())
-	      tests.extend(testconfigs.get_r2_n64_linux_configs())
-	    elif vendor == "img" and os_part == "elf":
-	      tests.extend(testconfigs.get_r6_o32_elf_configs())
-	      tests.extend(testconfigs.get_r6_n32_elf_configs())
-	      tests.extend(testconfigs.get_r6_n64_elf_configs())
-	    elif vendor == "mti" and os_part == "elf":
-	      tests.extend(testconfigs.get_r2_o32_elf_configs())
-	      tests.extend(testconfigs.get_r2_n32_elf_configs())
-	      tests.extend(testconfigs.get_r2_n64_elf_configs())
+	    if testsuite == "gcc" or testsuite == "g++":
+              if vendor == "img" and os_part == "linux-gnu":
+                tests.extend(testconfigs.get_r6_o32_linux_configs())
+                tests.extend(testconfigs.get_r6_n32_linux_configs())
+                tests.extend(testconfigs.get_r6_n64_linux_configs())
+              elif vendor == "mti" and os_part == "linux-gnu":
+                tests.extend(testconfigs.get_r2_o32_linux_configs())
+                tests.extend(testconfigs.get_r2_n32_linux_configs())
+                tests.extend(testconfigs.get_r2_n64_linux_configs())
+              elif vendor == "img" and os_part == "elf":
+                tests.extend(testconfigs.get_r6_o32_elf_configs())
+                tests.extend(testconfigs.get_r6_n32_elf_configs())
+                tests.extend(testconfigs.get_r6_n64_elf_configs())
+              elif vendor == "mti" and os_part == "elf":
+                tests.extend(testconfigs.get_r2_o32_elf_configs())
+                tests.extend(testconfigs.get_r2_n32_elf_configs())
+                tests.extend(testconfigs.get_r2_n64_elf_configs())
+            else:
+              if vendor == "mti" and os_part == "linux-gnu":
+                tests.extend(testconfigs.get_linux_configs())
+              elif vendor == "mti" and os_part == "elf":
+                tests.extend(testconfigs.get_elf_configs())
+
 	  for test in tests:
 	    if "cross" in self.runlist:
 	      test.deptestrunid = primary.testrunid

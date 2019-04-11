@@ -277,3 +277,41 @@ class GDBTestConfig:
     t.tasks['MIPS Toolchain'] = components
 
     return t
+
+class GASTestConfig:
+  def get_p32_elf_configs(self):
+    test_config = []
+    t = self.testDefinition("elf")
+
+    options = {}
+    options['Manual Triple'] = "nanomips-elf"
+    t.config['MIPS Prebuilt'] = options
+
+    t.description = "R6 Bare Metal"
+    test_config.append(deepcopy(t))
+
+    return test_config
+
+  def get_p32_linux_configs(self):
+    test_config = []
+    t = self.testDefinition("linux")
+
+    options = {}
+    options['Manual Triple'] = "nanomips-linux-musl"
+    t.config['MIPS Prebuilt'] = options
+
+    t.description = "R6 Linux"
+    test_config.append(deepcopy(t))
+
+    return test_config
+
+  def testDefinition(self, os_part):
+    t = PrefixedTestrunOptions("GAS Test")
+
+    t.tasks['MIPS Testing'] = { "GAS Test" : "Prebuilt" }
+    components = {}
+    components['Binutils'] = "Remote"
+    components['Toolchain Prebuilt'] = "Custom"
+    t.tasks['MIPS Toolchain'] = components
+
+    return t

@@ -5,7 +5,7 @@ from TestrunEditing import TestrunEditing, TestrunOptions
 from copy import deepcopy
 from OvertestExceptions import *
 from TestConfigurations import GCCDejagnuTestConfig, GPPDejagnuTestConfig,\
-			       GOLDTestConfig, GDBTestConfig
+			       GOLDTestConfig, GDBTestConfig, GASTestConfig
 
 class Addon:
   def __init__(self, ovtDB):
@@ -36,7 +36,7 @@ class Addon:
     storage=None
     groupname=None
     tot=False
-    runlist="source,cross,canadian,elf,linux-musl,img,g++,gcc,gnusim,binutils,gold,gdb".split(",")
+    runlist="source,cross,canadian,elf,linux-musl,img,g++,gcc,gnusim,binutils,gold,gdb,gas".split(",")
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -149,7 +149,7 @@ class Addon:
 	# test definition and configuration options for each one
 	# testsuites also know what concurrency suits them best
 	use_gnusim = "gnusim" in self.runlist and os_part != "linux-musl"
-	for testsuite in ["gcc", "g++", "gold", "gdb"]:
+	for testsuite in ["gcc", "g++", "gold", "gdb", "gas"]:
 	  if not testsuite in self.runlist:
 	    continue
 	  if testsuite == "gcc":
@@ -160,6 +160,8 @@ class Addon:
 	    testconfigs = GOLDTestConfig()
 	  elif testsuite == "gdb":
 	    testconfigs = GDBTestConfig()
+	  elif testsuite == "gas":
+	    testconfigs = GASTestConfig()
 	  testconfigs.tot = self.tot
 	  if os_part == "linux-musl":
 	    tests.extend(testconfigs.get_p32_linux_configs())
