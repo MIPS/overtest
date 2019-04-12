@@ -654,3 +654,13 @@ class LDTestConfig(GASTestConfig):
     components['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = components
     return t
+
+class BinutilsTestConfig(GASTestConfig):
+  def testDefinition(self, os_part):
+    t = PrefixedTestrunOptions("Binutils Testsuite")
+    t.tasks['MIPS Testing'] = { "Binutils Testsuite" : "Prebuilt" }
+    components = {}
+    components['Binutils'] = "Remote"
+    components['Toolchain Prebuilt'] = "Custom"
+    t.tasks['MIPS Toolchain'] = components
+    return t
