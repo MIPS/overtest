@@ -2,13 +2,13 @@ import os
 from Action import Action
 from Config import CONFIG
 
-# Binutils Test
+# Binutils Build
 
 class A117820(Action):
   def __init__(self, data):
     Action.__init__(self, data)
     self.actionid = 117820
-    self.name = "Binutils Test"
+    self.name = "Binutils Build"
 
   # Execute the action.
   def run(self):

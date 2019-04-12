@@ -37,7 +37,7 @@ class Addon:
     groupname=None
     tot=False
     gold=True
-    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,g++,gcc,binutils,gas,ld".split(",")
+    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,g++,gcc,binutils-build,gas,ld".split(",")
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -120,8 +120,8 @@ class Addon:
     self.gold = gold
 
     try:
-      if "binutils" in self.runlist:
-	tests = self.getBinutilsTestConfig()
+      if "binutils-build" in self.runlist:
+	tests = self.getBinutilsBuildConfig()
 	for test in tests:
 	  self.gridExec(test)
 	  print "created %d - %s" % (test.testrunid, test.description)
@@ -230,7 +230,7 @@ class Addon:
     # Submit the testrun
     self.te.doTestrunEditing(opts)
 
-  def getBinutilsTestConfig(self):
+  def getBinutilsBuildConfig(self):
     tests = []
     t = TestrunOptions("new")
     t.concurrency = 1
@@ -244,12 +244,12 @@ class Addon:
     t.tasks['MIPS Toolchain'] = actions
 
     actions = {}
-    actions['Binutils Test'] = "Standalone"
+    actions['Binutils Build'] = "Standalone"
 
     t.tasks['MIPS Testing'] = actions
 
     config = {}
-    t.config['Binutils Testing'] = config
+    t.config['Binutils Build'] = config
 
     targets = ["mips64el-freebsd",
                "mips64el-linux",
@@ -274,8 +274,8 @@ class Addon:
                "mips-vxworks"]
     for target in targets:
       t = deepcopy(t)
-      t.config['Binutils Testing']['Target'] = target
-      t.description = "Binutils - %s" % target
+      t.config['Binutils Build']['Target'] = target
+      t.description = "Binutils Build - %s" % target
       tests.append(t)
     
     return tests
