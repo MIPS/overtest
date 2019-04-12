@@ -63,8 +63,8 @@ class A117839(Action, GCC4RegressionParser):
 		 set CXX skip-cxx"""
 
     canon_triple = triple
-    if triple == "nanomips-elf":
-      canon_triple = "nanomips-unknown-elf"
+    if triple.startswith("nanomips"):
+      canon_triple = triple.replace("nanomips-", "nanomips-unknown-")
     a = a % (triple, canon_triple, src, self.getWorkPath(), triple,
              triple, triple, triple, triple, triple, triple)
     with open(os.path.join(self.getWorkPath(), "site.exp"), "w") as fh:
