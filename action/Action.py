@@ -337,7 +337,7 @@ class Action(Execute):
     None
 
   # Execute the action.
-  def gitFetch(self, reponame):
+  def gitFetch(self, reponame, deep=False):
     """
     The generic logic to clone a branch from a GIT repo
     """
@@ -345,9 +345,10 @@ class Action(Execute):
     remote = self.config.getVariable(self.name + " Remote")
     gitCmd = [CONFIG.git, "clone",
               "--reference=/projects/mipssw/git/" + reponame,
-              "-b", branch, "--depth", "1",
-              remote,
-              self.name.lower()]
+              "-b", branch]
+    if not deep:
+      gitCmd = gitCmd + ["--depth", "1"]
+    gitCmd = gitCmd + [remote, self.name.lower()]
 
     # Execute a command overriding some environment variables
     for i in range(30):

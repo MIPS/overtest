@@ -9,5 +9,8 @@ class A117821(Action):
     self.name = "QEMU"
 
   # Execute the action.
+  # Qemu source archives must be created by executing
+  # scripts/archive-source.sh within the qemu source tree which needs
+  # a deep check-out to work correctly.
   def run(self):
-    return self.gitFetch("qemu.git")
+    return self.gitFetch("qemu.git", deep=True)
