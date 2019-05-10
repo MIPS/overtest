@@ -12,7 +12,7 @@ class GNUTestConfig:
     t = self.testDefinition("elf")
   
     options = {}
-    options['Manual Triple'] = "mips-img-elf"
+    options['Manual Triple'] = "mips-mti-elf"
     t.config['MIPS Prebuilt'] = options
 
     options = {}
@@ -23,42 +23,42 @@ class GNUTestConfig:
     options['Endian'] = "Big"
   
     if not self.tot:
-      options['CFLAGS'] = "-msoft-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -msoft-float -mmicromips"
       t.description = "R6 Bare Metal - BE,O32,SF,MM"
       test_config.append(deepcopy(t))
   
-      options['CFLAGS'] = "-mhard-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -mhard-float -mmicromips"
       t.description = "R6 Bare Metal - BE,O32,HF,MM"
       test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips32r6 -msoft-float"
     t.description = "R6 Bare Metal - BE,O32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips32r6 -mhard-float"
     t.description = "R6 Bare Metal - BE,O32,HF"
     test_config.append(deepcopy(t))
   
     options['Endian'] = "Little"
 
     if not self.tot:
-      options['CFLAGS'] = "-msoft-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -msoft-float -mmicromips"
       t.description = "R6 Bare Metal - LE,O32,SF,MM"
       test_config.append(deepcopy(t))
   
-      options['CFLAGS'] = "-mhard-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -mhard-float -mmicromips"
       t.description = "R6 Bare Metal - LE,O32,HF,MM"
       test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips32r6 -msoft-float"
     t.description = "R6 Bare Metal - LE,O32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips32r6 -mhard-float"
     t.description = "R6 Bare Metal - LE,O32,HF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float -msingle-float -fshort-double"
+    options['CFLAGS'] = "-march=mips32r6 -mhard-float -msingle-float -fshort-double"
     t.description = "R6 Bare Metal - LE,O32,HF,S"
     test_config.append(deepcopy(t))
   
@@ -78,7 +78,7 @@ class GNUTestConfig:
     t = self.testDefinition("elf")
 
     options = {}
-    options['Manual Triple'] = "mips-img-elf"
+    options['Manual Triple'] = "mips-mti-elf"
     t.config['MIPS Prebuilt'] = options
   
     options = {}
@@ -88,21 +88,21 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips64r6 -msoft-float"
     t.description = "R6 Bare Metal - BE,N32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Bare Metal - BE,N32,HF"
     test_config.append(deepcopy(t))
   
     options['Endian'] = "Little"
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips64r6 -msoft-float"
     t.description = "R6 Bare Metal - LE,N32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Bare Metal - LE,N32,HF"
     test_config.append(deepcopy(t))
   
@@ -113,7 +113,7 @@ class GNUTestConfig:
     t = self.testDefinition("elf")
 
     options = {}
-    options['Manual Triple'] = "mips-img-elf"
+    options['Manual Triple'] = "mips-mti-elf"
     t.config['MIPS Prebuilt'] = options
   
     options = {}
@@ -123,25 +123,25 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips64r6 -msoft-float"
     t.description = "R6 Bare Metal - BE,N64,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Bare Metal - BE,N64,HF"
     test_config.append(deepcopy(t))
   
     options['Endian'] = "Little"
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips64r6 -msoft-float"
     t.description = "R6 Bare Metal - LE,N64,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Bare Metal - LE,N64,HF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-march=i6400"
+    options['CFLAGS'] = "-march=mips64r6 -march=i6400"
     t.description = "R6 Bare Metal - LE,N64,HF,I6400"
     test_config.append(deepcopy(t))
   
@@ -157,7 +157,7 @@ class GNUTestConfig:
     t = self.testDefinition("linux")
 
     options = {}
-    options['Manual Triple'] = "mips-img-linux-gnu"
+    options['Manual Triple'] = "mips-mti-linux-gnu"
     t.config['MIPS Prebuilt'] = options
   
     options = {}
@@ -168,38 +168,38 @@ class GNUTestConfig:
     options['Endian'] = "Big"
   
     if not self.tot:
-      options['CFLAGS'] = "-msoft-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -msoft-float -mmicromips"
       t.description = "R6 Linux - BE,O32,SF,MM"
       test_config.append(deepcopy(t))
   
-      options['CFLAGS'] = "-mhard-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -mhard-float -mmicromips"
       t.description = "R6 Linux - BE,O32,HF,MM"
       test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips32r6 -msoft-float"
     t.description = "R6 Linux - BE,O32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips32r6 -mhard-float"
     t.description = "R6 Linux - BE,O32,HF"
     test_config.append(deepcopy(t))
   
     options['Endian'] = "Little"
   
     if not self.tot:
-      options['CFLAGS'] = "-msoft-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -msoft-float -mmicromips"
       t.description = "R6 Linux - LE,O32,SF,MM"
       test_config.append(deepcopy(t))
   
-      options['CFLAGS'] = "-mhard-float -mmicromips"
+      options['CFLAGS'] = "-march=mips32r6 -mhard-float -mmicromips"
       t.description = "R6 Linux - LE,O32,HF,MM"
       test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips32r6 -msoft-float"
     t.description = "R6 Linux - LE,O32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips32r6 -mhard-float"
     t.description = "R6 Linux - LE,O32,HF"
     test_config.append(deepcopy(t))
   
@@ -210,7 +210,7 @@ class GNUTestConfig:
     t = self.testDefinition("linux")
 
     options = {}
-    options['Manual Triple'] = "mips-img-linux-gnu"
+    options['Manual Triple'] = "mips-mti-linux-gnu"
     t.config['MIPS Prebuilt'] = options
   
     options = {}
@@ -220,22 +220,22 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips64r6 -msoft-float"
     t.description = "R6 Linux - BE,N32,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Linux - BE,N32,HF"
     test_config.append(deepcopy(t))
   
     options['Endian'] = "Little"
   
     if self.tot:
-      options['CFLAGS'] = "-msoft-float"
+      options['CFLAGS'] = "-march=mips64r6 -msoft-float"
       t.description = "R6 Linux - LE,N32,SF"
       test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Linux - LE,N32,HF"
     test_config.append(deepcopy(t))
   
@@ -246,7 +246,7 @@ class GNUTestConfig:
     t = self.testDefinition("linux")
 
     options = {}
-    options['Manual Triple'] = "mips-img-linux-gnu"
+    options['Manual Triple'] = "mips-mti-linux-gnu"
     t.config['MIPS Prebuilt'] = options
   
     options = {}
@@ -256,22 +256,22 @@ class GNUTestConfig:
   
     options['Endian'] = "Big"
   
-    options['CFLAGS'] = "-msoft-float"
+    options['CFLAGS'] = "-march=mips64r6 -msoft-float"
     t.description = "R6 Linux - BE,N64,SF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Linux - BE,N64,HF"
     test_config.append(deepcopy(t))
   
     options['Endian'] = "Little"
   
     if self.tot:
-      options['CFLAGS'] = "-msoft-float"
+      options['CFLAGS'] = "-march=mips64r6 -msoft-float"
       t.description = "R6 Linux - LE,N64,SF"
       test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-mhard-float"
+    options['CFLAGS'] = "-march=mips64r6 -mhard-float"
     t.description = "R6 Linux - LE,N64,HF"
     test_config.append(deepcopy(t))
   
