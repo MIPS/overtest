@@ -38,7 +38,7 @@ class Addon:
     groupname=None
     tot=False
     gold=True
-    runlist="source,cross,canadian,native,elf,linux-gnu,mti,g++,gcc,binutils-build,gas,ld,binutils".split(",")
+    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,g++,gcc,binutils-build,gas,ld,binutils".split(",")
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -131,82 +131,88 @@ class Addon:
 	self.gridExec(sourcerel)
 	print "created %d - %s" % (sourcerel.testrunid, sourcerel.description)
       lasttestrunid = None
-      vendor="mti"
-      for os_part in ["elf", "linux-gnu"]:
-        if not os_part in self.runlist:
+      for vendor in ["img", "mti"]:
+        if vendor == "img" and not vendor in self.runlist:
           continue
-        primary = self.getCrossBuildConfig(vendor, os_part)
-        if "cross" in self.runlist:
-          self.gridExec(primary)
-          print "created %d - %s" % (primary.testrunid, primary.description)
-        else:
-          print "Not building toolchains, assuming standard package names in %s" % self.storage
-        secondary = []
-        if "canadian" in self.runlist:
-          secondary.extend(self.getCanadianBuildConfig(vendor, os_part))
-        if "native" in self.runlist and os_part == "linux-gnu":
-          secondary.extend(self.getNativeBuildConfig(vendor))
-        for build in secondary:
-          if "cross" in self.runlist:
-            build.deptestrunid = primary.testrunid
-          if lasttestrunid != None:
-            build.deptestrunid = lasttestrunid
-          build.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
-          self.gridExec(build)
-          lasttestrunid = build.testrunid
-          print "created %d - %s" % (build.testrunid, build.description)
-
-        tests = []
-        # Iterate over all the relevant testsuites gathering the
-        # test definition and configuration options for each one
-        # testsuites also know what concurrency suits them best
-        for testsuite in ["gcc", "g++", "gas", "ld", "binutils"]:
-          if not testsuite in self.runlist:
+        if vendor == "mti" and "img" in self.runlist:
+          continue
+        for os_part in ["elf", "linux-gnu"]:
+          if not os_part in self.runlist:
             continue
-          use_gnusim = "gnusim" in self.runlist
-          if testsuite == "gcc":
-            testconfigs = GCCDejagnuTestConfig(use_gnusim)
-          elif testsuite == "g++":
-            testconfigs = GPPDejagnuTestConfig(use_gnusim)
-          elif testsuite == "gas":
-            testconfigs = GASTestConfig()
-          elif testsuite == "ld":
-            testconfigs = LDTestConfig()
-          elif testsuite == "binutils":
-            testconfigs = BinutilsTestConfig()
-          testconfigs.tot = self.tot
-          if testsuite == "gcc" or testsuite == "g++":
-            if os_part == "linux-gnu":
-              tests.extend(testconfigs.get_r6_o32_linux_configs())
-              tests.extend(testconfigs.get_r6_n32_linux_configs())
-              tests.extend(testconfigs.get_r6_n64_linux_configs())
-              tests.extend(testconfigs.get_r2_o32_linux_configs())
-              tests.extend(testconfigs.get_r2_n32_linux_configs())
-              tests.extend(testconfigs.get_r2_n64_linux_configs())
-            elif os_part == "elf":
-              tests.extend(testconfigs.get_r6_o32_elf_configs())
-              tests.extend(testconfigs.get_r6_n32_elf_configs())
-              tests.extend(testconfigs.get_r6_n64_elf_configs())
-              tests.extend(testconfigs.get_r2_o32_elf_configs())
-              tests.extend(testconfigs.get_r2_n32_elf_configs())
-              tests.extend(testconfigs.get_r2_n64_elf_configs())
-          else:
-            if os_part == "linux-gnu":
-              tests.extend(testconfigs.get_linux_configs())
-            elif os_part == "elf":
-              tests.extend(testconfigs.get_elf_configs())
-
-        for test in tests:
+          primary = self.getCrossBuildConfig(vendor, os_part)
           if "cross" in self.runlist:
-            test.deptestrunid = primary.testrunid
-          if lasttestrunid != None:
-            test.deptestrunid = lasttestrunid
-          test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/scratch/overtest/qemu"
-          test.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
-          if len(self.source_tags) > 0:
-            test.config['MIPS Tools'] = self.source_tags
-          self.gridExec(test)
-          print "created %d - %s" % (test.testrunid, test.description)
+            self.gridExec(primary)
+            print "created %d - %s" % (primary.testrunid, primary.description)
+          else:
+            print "Not building toolchains, assuming standard package names in %s" % self.storage
+          secondary = []
+          if "canadian" in self.runlist:
+            secondary.extend(self.getCanadianBuildConfig(vendor, os_part))
+          if "native" in self.runlist and os_part == "linux-gnu":
+            secondary.extend(self.getNativeBuildConfig(vendor))
+          for build in secondary:
+            if "cross" in self.runlist:
+              build.deptestrunid = primary.testrunid
+            if lasttestrunid != None:
+              build.deptestrunid = lasttestrunid
+            build.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
+            self.gridExec(build)
+            lasttestrunid = build.testrunid
+            print "created %d - %s" % (build.testrunid, build.description)
+
+          if vendor == "img":
+            continue
+          tests = []
+          # Iterate over all the relevant testsuites gathering the
+          # test definition and configuration options for each one
+          # testsuites also know what concurrency suits them best
+          for testsuite in ["gcc", "g++", "gas", "ld", "binutils"]:
+            if not testsuite in self.runlist:
+              continue
+            use_gnusim = "gnusim" in self.runlist
+            if testsuite == "gcc":
+              testconfigs = GCCDejagnuTestConfig(use_gnusim)
+            elif testsuite == "g++":
+              testconfigs = GPPDejagnuTestConfig(use_gnusim)
+            elif testsuite == "gas":
+              testconfigs = GASTestConfig()
+            elif testsuite == "ld":
+              testconfigs = LDTestConfig()
+            elif testsuite == "binutils":
+              testconfigs = BinutilsTestConfig()
+            testconfigs.tot = self.tot
+            if testsuite == "gcc" or testsuite == "g++":
+              if os_part == "linux-gnu":
+                tests.extend(testconfigs.get_r6_o32_linux_configs())
+                tests.extend(testconfigs.get_r6_n32_linux_configs())
+                tests.extend(testconfigs.get_r6_n64_linux_configs())
+                tests.extend(testconfigs.get_r2_o32_linux_configs())
+                tests.extend(testconfigs.get_r2_n32_linux_configs())
+                tests.extend(testconfigs.get_r2_n64_linux_configs())
+              elif os_part == "elf":
+                tests.extend(testconfigs.get_r6_o32_elf_configs())
+                tests.extend(testconfigs.get_r6_n32_elf_configs())
+                tests.extend(testconfigs.get_r6_n64_elf_configs())
+                tests.extend(testconfigs.get_r2_o32_elf_configs())
+                tests.extend(testconfigs.get_r2_n32_elf_configs())
+                tests.extend(testconfigs.get_r2_n64_elf_configs())
+            else:
+              if os_part == "linux-gnu":
+                tests.extend(testconfigs.get_linux_configs())
+              elif os_part == "elf":
+                tests.extend(testconfigs.get_elf_configs())
+
+          for test in tests:
+            if "cross" in self.runlist:
+              test.deptestrunid = primary.testrunid
+            if lasttestrunid != None:
+              test.deptestrunid = lasttestrunid
+            test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/scratch/overtest/qemu"
+            test.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
+            if len(self.source_tags) > 0:
+              test.config['MIPS Tools'] = self.source_tags
+            self.gridExec(test)
+            print "created %d - %s" % (test.testrunid, test.description)
 
     except OvtError, e:
       print e

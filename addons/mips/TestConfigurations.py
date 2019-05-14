@@ -141,7 +141,7 @@ class GNUTestConfig:
     t.description = "R6 Bare Metal - LE,N64,HF"
     test_config.append(deepcopy(t))
   
-    options['CFLAGS'] = "-march=mips64r6 -march=i6400"
+    options['CFLAGS'] = "-march=i6400"
     t.description = "R6 Bare Metal - LE,N64,HF,I6400"
     test_config.append(deepcopy(t))
   
