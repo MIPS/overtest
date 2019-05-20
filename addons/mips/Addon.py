@@ -38,7 +38,7 @@ class Addon:
     groupname=None
     tot=False
     gold=True
-    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,g++,gcc,binutils-build,gas,ld,binutils".split(",")
+    runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,mti-only,g++,gcc,binutils-build,gas,ld,binutils".split(",")
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -131,15 +131,15 @@ class Addon:
 	self.gridExec(sourcerel)
 	print "created %d - %s" % (sourcerel.testrunid, sourcerel.description)
       lasttestrunid = None
-      for vendor in ["img", "mti"]:
+      for vendor in ["img", "mti", "mti-only"]:
         if vendor == "img" and not vendor in self.runlist:
           continue
-        if vendor == "mti" and "img" in self.runlist:
+        if vendor[:3] == "mti" and "img" in self.runlist:
           continue
         for os_part in ["elf", "linux-gnu"]:
           if not os_part in self.runlist:
             continue
-          primary = self.getCrossBuildConfig(vendor, os_part)
+          primary = self.getCrossBuildConfig(vendor[:3], os_part)
           if "cross" in self.runlist:
             self.gridExec(primary)
             print "created %d - %s" % (primary.testrunid, primary.description)
@@ -147,9 +147,9 @@ class Addon:
             print "Not building toolchains, assuming standard package names in %s" % self.storage
           secondary = []
           if "canadian" in self.runlist:
-            secondary.extend(self.getCanadianBuildConfig(vendor, os_part))
+            secondary.extend(self.getCanadianBuildConfig(vendor[:3], os_part))
           if "native" in self.runlist and os_part == "linux-gnu":
-            secondary.extend(self.getNativeBuildConfig(vendor))
+            secondary.extend(self.getNativeBuildConfig(vendor[:3]))
           for build in secondary:
             if "cross" in self.runlist:
               build.deptestrunid = primary.testrunid
@@ -160,8 +160,6 @@ class Addon:
             lasttestrunid = build.testrunid
             print "created %d - %s" % (build.testrunid, build.description)
 
-          if vendor == "img":
-            continue
           tests = []
           # Iterate over all the relevant testsuites gathering the
           # test definition and configuration options for each one
@@ -183,19 +181,23 @@ class Addon:
             testconfigs.tot = self.tot
             if testsuite == "gcc" or testsuite == "g++":
               if os_part == "linux-gnu":
-                tests.extend(testconfigs.get_r6_o32_linux_configs())
-                tests.extend(testconfigs.get_r6_n32_linux_configs())
-                tests.extend(testconfigs.get_r6_n64_linux_configs())
-                tests.extend(testconfigs.get_r2_o32_linux_configs())
-                tests.extend(testconfigs.get_r2_n32_linux_configs())
-                tests.extend(testconfigs.get_r2_n64_linux_configs())
+                if vendor != "mti-only":
+                  tests.extend(testconfigs.get_r6_o32_linux_configs(vendor))
+                  tests.extend(testconfigs.get_r6_n32_linux_configs(vendor))
+                  tests.extend(testconfigs.get_r6_n64_linux_configs(vendor))
+                if vendor != "img":
+                  tests.extend(testconfigs.get_r2_o32_linux_configs(vendor[:3]))
+                  tests.extend(testconfigs.get_r2_n32_linux_configs(vendor[:3]))
+                  tests.extend(testconfigs.get_r2_n64_linux_configs(vendor[:3]))
               elif os_part == "elf":
-                tests.extend(testconfigs.get_r6_o32_elf_configs())
-                tests.extend(testconfigs.get_r6_n32_elf_configs())
-                tests.extend(testconfigs.get_r6_n64_elf_configs())
-                tests.extend(testconfigs.get_r2_o32_elf_configs())
-                tests.extend(testconfigs.get_r2_n32_elf_configs())
-                tests.extend(testconfigs.get_r2_n64_elf_configs())
+                if vendor != "mti-only":
+                  tests.extend(testconfigs.get_r6_o32_elf_configs(vendor))
+                  tests.extend(testconfigs.get_r6_n32_elf_configs(vendor))
+                  tests.extend(testconfigs.get_r6_n64_elf_configs(vendor))
+                if vendor != "img":
+                  tests.extend(testconfigs.get_r2_o32_elf_configs(vendor[:3]))
+                  tests.extend(testconfigs.get_r2_n32_elf_configs(vendor[:3]))
+                  tests.extend(testconfigs.get_r2_n64_elf_configs(vendor[:3]))
             else:
               if os_part == "linux-gnu":
                 tests.extend(testconfigs.get_linux_configs())
@@ -471,7 +473,7 @@ class Addon:
 		"MIPS32R6 LE O32 SF", "MIPS32R6 BE O32 SF",
 		"MIPS64R6 LE N32 HF", "MIPS64R6 BE N32 HF",
 		"MIPS64R6 LE N64 HF", "MIPS64R6 BE N64 HF"
-                "MIPS32R2 LE O32 HF", "MIPS32R2 BE O32 HF",
+		"MIPS32R2 LE O32 HF", "MIPS32R2 BE O32 HF",
 		"MIPS32R2 LE O32 HF N8", "MIPS32R2 BE O32 HF N8",
 		"MIPS32R2 LE O32 SF", "MIPS32R2 BE O32 SF",
 		"MIPS64R2 LE N32 HF", "MIPS64R2 BE N32 HF",
