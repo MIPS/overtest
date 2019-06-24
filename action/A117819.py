@@ -454,10 +454,10 @@ class A117819(Action):
     if installtgz != None:
       self.createDirectory(os.path.dirname(installtgz))
       if "mingw" in host_triple:
-        cmd_dref="--dereference --hard-dereference"
+        cmd_dref="--dereference"
       else:
         cmd_dref=""
-      if self.execute(command=["tar %s" % cmd_dref,
+      if self.execute(command=["tar", "%s" % cmd_dref,
 			       "--owner=0", "--group=0", "-pczf", installtgz,
 	                       foldername],
 		      workdir=self.getSharedPath()) != 0:
