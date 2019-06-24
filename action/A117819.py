@@ -169,7 +169,7 @@ class A117819(Action):
 
 
     build_qemu = False
-    if self.testrun.getVersion("QEMU") != None and "mingw" not in host_triple:
+    if self.testrun.getVersion("QEMU") != None:
       build_qemu = True
 
     components = ["expat", "termcap", "ncurses", "texinfo"]
@@ -179,8 +179,7 @@ class A117819(Action):
 
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi", "glib"])
-      if host_triple == "i686-w64-mingw32":
-	components.extend(["libiconv", "gettext"])
+      components.extend(["libiconv", "gettext"])
 
     source = {}
     for component in components:
@@ -234,9 +233,7 @@ class A117819(Action):
     components.extend (opt_components)
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi"])
-      if host_triple == "i686-w64-mingw32":
-	components.extend(["libiconv", "gettext"])
-      components.append("glib")
+      components.extend(["libiconv", "gettext", "glib"])
 
     # Build host support libraries for GDB
     cmd = ["b/build_toolchain", "build"]
