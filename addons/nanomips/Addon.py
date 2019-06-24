@@ -365,7 +365,7 @@ class Addon:
 
     host_triple = "i686-w64-mingw32"
     t.config['MIPS Host']['Host Triple'] = host_triple
-    t.config['MIPS Host']['Host Version'] = "4.9.4_v3.1.0"
+    t.config['MIPS Host']['Host Version'] = "4.9.4_v6.0.0"
     t.description = "%s %s" % (target_triple, host_triple)
     secondary_install = os.path.join(self.storage, "%s_%s.tgz" % (target_triple, host_triple))
     t.config['MIPS Build']['Install Root'] = secondary_install
