@@ -39,6 +39,7 @@ class Addon:
     tot=False
     gold=True
     runlist="source,cross,canadian,native,elf,linux-gnu,img,mti,mti-only,g++,gcc,binutils-build,gas,ld,binutils".split(",")
+    newrunlist=None
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -99,6 +100,10 @@ class Addon:
 	    print runlist
 	else:
 	  runlist = newrunlist
+
+    # Don't build binutils-build unless asked for
+    if newrunlist == None:
+      runlist.remove("binutils-build")
 
     if version_name.startswith("2016.05-"):
       tot = False

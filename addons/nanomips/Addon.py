@@ -38,6 +38,7 @@ class Addon:
     groupname=None
     tot=False
     runlist="source,cross,canadian,elf,linux-musl,img,g++,gcc,gnusim,binutils-build,gold,gdb,gas,ld,binutils".split(",")
+    newrunlist=None
 
     for (o,a) in opts:
       if o in ("--binutils"):
@@ -96,6 +97,10 @@ class Addon:
 	else:
 	  runlist = newrunlist
 
+    # Don't build binutils-build unless asked for
+    if newrunlist == None:
+      runlist.remove("binutils-build")
+          
     if storage == None or not storage.startswith("/"):
       print "An absolute path to store deliverables must be specified"
       sys.exit(1)
