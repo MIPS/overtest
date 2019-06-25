@@ -141,10 +141,10 @@ class Addon:
 	if "canadian" in self.runlist:
 	  secondary.extend(self.getCanadianBuildConfig("", os_part))
 	for build in secondary:
-	  if "cross" in self.runlist:
+	  if "cross" in self.runlist and build != secondary[0]:
 	    build.deptestrunid = primary.testrunid
-	  if lasttestrunid != None:
-	    build.deptestrunid = lasttestrunid
+#	  if lasttestrunid != None:
+#	    build.deptestrunid = lasttestrunid
 	  build.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
 	  self.gridExec(build)
           lasttestrunid = build.testrunid
