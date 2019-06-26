@@ -158,7 +158,7 @@ class Addon:
           for build in secondary:
             if "cross" in self.runlist:
               build.deptestrunid = primary.testrunid
-            if lasttestrunid != None:
+            elif lasttestrunid != None:
               build.deptestrunid = lasttestrunid
             build.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
             self.gridExec(build)
@@ -212,7 +212,7 @@ class Addon:
           for test in tests:
             if "cross" in self.runlist:
               test.deptestrunid = primary.testrunid
-            if lasttestrunid != None:
+            elif lasttestrunid != None:
               test.deptestrunid = lasttestrunid
             test.config['MIPS Prebuilt']['Manual QEMU Root'] = "/scratch/overtest/qemu"
             test.config['MIPS Prebuilt']['Manual Toolchain Root'] = primary.config['MIPS Build']['Install Root']
