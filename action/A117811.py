@@ -2,6 +2,8 @@ import os
 from Action import Action
 from common.MIPSTools import MIPSConfig
 from Config import CONFIG
+import time
+import random
 
 # mips_tool_chain
 
@@ -16,8 +18,13 @@ class A117811(Action):
     if self.version == "Portal":
       branch = self.config.getVariable("mips_tool_chain Branch")
 
-      ret = self.execute(command=[CONFIG.git, "clone", "%s:mips_tool_chain.git" % MIPSConfig.Portal],
-                         workdir=self.getWorkPath())
+      for i in range(30):
+        ret = self.execute(command=[CONFIG.git, "clone", "%s:mips_tool_chain.git" % MIPSConfig.Portal],
+                           workdir=self.getWorkPath())
+        if result == 0:
+          break
+        else:
+          time.sleep(random.randint(1,30))
 
       if ret != 0:
         self.error("Unable to clone")
