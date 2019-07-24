@@ -14,3 +14,4 @@ class Config(config.centos5.Config):
   python = "/mips/tools/sweng/freeware/python/2.7.13/Linux/bin/python"
   git = "/usr/local/bin/git"
   cores = 48
+  gitref = "/scratch/overtest/git"

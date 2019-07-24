@@ -14,3 +14,4 @@ class Config(ConfigFactory.DefaultConfig):
   bitstreams = "/user/rgi_data2/Verify/BitStreams"
   searchPathSep = ':'
   p4 = '/meta/perforce/bin/p4'
+  gitref = "/projects/mipssw/git"

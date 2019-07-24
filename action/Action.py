@@ -344,7 +344,7 @@ class Action(Execute):
     branch = self.config.getVariable(self.name + " Branch")
     remote = self.config.getVariable(self.name + " Remote")
     gitCmd = [CONFIG.git, "clone",
-              "--reference=/projects/mipssw/git/" + reponame,
+              ("--reference=%s/" % CONFIG.gitref) + reponame,
               "-b", branch]
     if not deep:
       gitCmd = gitCmd + ["--depth", "1"]

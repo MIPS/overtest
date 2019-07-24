@@ -15,7 +15,7 @@ class A117828(Action):
     # Execute a command overriding some environment variables
     result = self.execute(workdir=self.getSharedPath(),
                           command=[CONFIG.git, "clone",
-                                               "--reference=/projects/mipssw/git/uTest.git",
+                                               "--reference=%s/uTest.git" % CONFIG.gitref,
                                                "git://mipssw-mgmt.ba.imgtec.org/sec/uTest.git",
                                                "uTest"])
 
@@ -31,7 +31,7 @@ class A117828(Action):
  
     result = self.execute(workdir=self.getSharedPath(),
                           command=[CONFIG.git, "clone",
-                                               "--reference=/projects/mipssw/git/codesize-test-suites.git",
+                                               "--reference=%s/codesize-test-suites.git" % CONFIG.gitref,
                                                "git://mipssw-mgmt.ba.imgtec.org/sec/codesize-test-suites.git",
                                                "codesize-test-suites"])
 

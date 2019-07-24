@@ -22,7 +22,7 @@ class A117829(Action):
     # Execute a command overriding some environment variables
     for i in range(30):
       result = self.execute(command=[CONFIG.git, "clone",
-                                     "--reference=/projects/mipssw/git/mips_tool_chain.git",
+                                     "--reference=%s/mips_tool_chain.git" % CONFIG.git,
                                      "--branch=master",
                                      "git://mipssw-mgmt.ba.imgtec.org/mips_tool_chain.git",
                                      "mips_tool_chain"])
