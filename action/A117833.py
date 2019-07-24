@@ -15,7 +15,8 @@ component_map = {"GCC":"gcc",
 		 "Glibc":"glibc",
 		 "QEMU":"qemu",
 		 "uClibc":"uclibc",
-		 "Dejagnu":"dejagnu"}
+		 "Dejagnu":"dejagnu",
+		 "Python":"python"}
 
 class A117833(Action):
   def __init__(self, data):

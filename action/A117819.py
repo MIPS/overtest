@@ -27,20 +27,21 @@ class A117819(Action):
       else:
         self.concurrency = 12
 
-    # Execute a command overriding some environment variables
-    for i in range(30):
-      result = self.execute(command=[CONFIG.git, "clone",
-                                     "--reference=%s/mips_tool_chain.git" % CONFIG.gitref,
-                                     "--branch=master",
-                                     "git://dmz-portal.mipstec.com/mips_tool_chain.git",
-                                     "mips_tool_chain"])
-      if result == 0:
-	break
-      else:
-	time.sleep(random.randint(1,30))
+    if not os.path.exists ("mips_tool_chain"):
+      # Execute a command overriding some environment variables
+      for i in range(30):
+        result = self.execute(command=[CONFIG.git, "clone",
+                                       "--reference=%s/mips_tool_chain.git" % CONFIG.gitref,
+                                       "--branch=master",
+                                       "git://dmz-portal.mipstec.com/mips_tool_chain.git",
+                                       "mips_tool_chain"])
+        if result == 0:
+          break
+        else:
+          time.sleep(random.randint(1,30))
 
-    if result != 0:
-      self.error("Unable to clone repository")
+      if result != 0:
+        self.error("Unable to clone repository")
 
     # Now construct the work area
     result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), "git://dmz-portal.mipstec.com")],
@@ -152,6 +153,8 @@ class A117819(Action):
       # A canadian cross consumes a prebuilt toolchain
       reference_root = self.config.getVariable("Toolchain Root")
       host_path = ":".join([os.path.join(reference_root, "bin"),host_path])
+      if os.path.exists(os.path.join(reference_root, "python-root")):
+        host_path = ":".join([os.path.join(reference_root, "python-root", "bin"),host_path])
       # It also just steals all target files from the reference to
       # save build time and avoid unneccessary differences in target
       # objects
@@ -231,7 +234,7 @@ class A117819(Action):
       options.append("--host=%s" % host_triple)
       options.append("--path=%s" % host_path)
 
-    components = ["expat", "termcap", "ncurses"]
+    components = ["expat", "termcap", "ncurses", "openssl"]
     components.extend (opt_components)
     if build_qemu:
       components.extend(["zlib", "pixman", "libffi"])
@@ -244,6 +247,26 @@ class A117819(Action):
     for component in components:
       if self.execute(command=[" ".join(cmd + [source[component], component])], shell=True) != 0:
 	self.error("Failed to build %s" % component)
+
+    # Prepare special build options for python
+    if self.testrun.getVersion("Python") != None:
+      options = ["--git_home=git://dmz-portal.mipstec.com",
+	         "--prefix=%s/python-root" % install,
+	         "--build=%s" % build,
+                 "--host=%s" % host_triple,
+                 "--path=%s" % host_path,
+	         "--jobs=%d" % self.concurrency]
+      python = os.path.join(self.testrun.getSharedPath("Python"), "python")
+      options.append("--src=python:%s" % python)
+      if "mingw" in host_triple:
+        options.append("--build_triple=x86_64-pc-linux-gnu")
+      else:
+        options.append("--build_triple=%s" % host_triple)
+      cmd = ["b/build_toolchain", "build"]
+      cmd.extend(options)
+      cmd.append("--hostlibs=%s" % hostinstall)
+      if self.execute(command=[" ".join(cmd + ["python"])], shell=True) != 0:
+        self.error("Failed to build Python")
 
     # Prepare for main tools build
     options = ["--path=%s" % host_path,
@@ -310,6 +333,7 @@ class A117819(Action):
     options.append("--src=gcc:%s" % gcc)
     gdb = os.path.join(self.testrun.getSharedPath("GDB"), "gdb")
     options.append("--src=gdb:%s" % gdb)
+    options.append("--src=gdb-py:%s" % gdb)
     if build_qemu:
       qemu = os.path.join(self.testrun.getSharedPath("QEMU"), "qemu")
       options.append("--src=qemu:%s" % qemu)
@@ -440,6 +464,10 @@ class A117819(Action):
     if self.execute(command=[" ".join(cmd + [extra_host, "gdb"])], shell=True) != 0:
       self.error("Failed to build gdb")
 
+    if self.testrun.getVersion("Python") != None:
+      if self.execute(command=[" ".join(cmd + [extra_host, "gdb-py"])], shell=True) != 0:
+        self.error("Failed to build gdb-py")
+
     if build_qemu:
       if self.execute(command=[" ".join(cmd + [extra_host, "qemu"])], shell=True) != 0:
 	self.error("Failed to build qemu")
@@ -448,23 +476,21 @@ class A117819(Action):
     if self.execute(command=["chmod", "-R", "o=g", install]) != 0:
       self.error("Failed to set permissions")
 
-    self.execute(command=["strip -d bin/* %s/bin/* libexec/gcc/%s/*/*" % (target, target)],
+    self.execute(command=["strip -d bin/* %s/bin/* libexec/gcc/%s/*/* python-root/bin/*" % (target, target)],
 		 workdir=install,
 		 shell=True)
 
     # Finalise the build
     if installtgz != None:
       self.createDirectory(os.path.dirname(installtgz))
+      cmd=["tar"]
       if "mingw" in host_triple:
-        cmd_dref="--dereference"
-        cmd_hdref="--hard-dereference"
-      else:
-        cmd_dref=""
-        cmd_hdref=""
-      if self.execute(command=["tar", "%s" % cmd_dref, "%s" % cmd_hdref,
-			       "--owner=0", "--group=0", "-pczf", installtgz,
-	                       foldername],
+        cmd.extend(["--dereference", "--hard-dereference"])
+
+      if self.execute(command = (cmd + ["--owner=0", "--group=0",
+                                         "-pczf", installtgz,
+                                         foldername]),
 		      workdir=self.getSharedPath()) != 0:
         self.error("Failed to tar up toolchain")
-		      
+
     return self.success()

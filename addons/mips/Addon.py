@@ -22,7 +22,7 @@ class Addon:
       opts, args = getopt.getopt(args, "", ["binutils=","gcc=","gdb=","newlib=",
 					    "uclibc=","glibc=","smallclib=",
 					    "gold=", "packages=", "dejagnu=",
-                                            "qemu=",
+                                            "qemu=", "python=",
 					    "components=","groupname=",
 					    "version=","storage=","tot",
 					    "runlist="])
@@ -64,6 +64,8 @@ class Addon:
 	source_tags['Packages Branch'] = a
       elif o in ("--dejagnu"):
 	source_tags['Dejagnu Branch'] = a
+      elif o in ("--python"):
+	source_tags['Python Branch'] = a
       elif o in ("--components"):
 	source_tags['Binutils Branch'] = a
 	source_tags['GCC Branch'] = a
@@ -76,6 +78,7 @@ class Addon:
 	source_tags['Packages Branch'] = a
 	source_tags['Dejagnu Branch'] = a
 	source_tags['QEMU Branch'] = a
+	source_tags['Python Branch'] = a
       elif o in ("--groupname"):
 	groupname = a
       elif o in ("--version"):
@@ -123,7 +126,6 @@ class Addon:
     self.groupname = groupname
     self.runlist = runlist
     self.tot = tot
-    self.gold = gold
 
     try:
       if "binutils-build" in self.runlist:
@@ -306,14 +308,11 @@ class Addon:
     if not self.tot:
       actions['SmallClib'] = "Remote"
     actions['Glibc'] = "Remote"
-    if self.gold:
-      actions['GOLD'] = "Remote"
+    actions['GOLD'] = "Remote"
     actions['uClibc'] = "Remote"
     actions['QEMU'] = "Remote"
-    if self.gold:
-      actions['Toolchain Source'] = "All - qemu"
-    else:
-      actions['Toolchain Source'] = "All - nogold"
+    actions['Python'] = "Remote"
+    actions['Toolchain Source'] = "All - qemu,python"
 
     t.tasks['MIPS Toolchain'] = actions
 
@@ -346,28 +345,22 @@ class Addon:
     actions['Binutils'] = "Remote"
     actions['GCC'] = "Remote"
     actions['GDB'] = "Remote"
-    if self.gold:
-      actions['GOLD'] = "Remote"
+    actions['GOLD'] = "Remote"
     actions['QEMU'] = "Remote"
     actions['Packages'] = "Remote"
     actions['Dejagnu'] = "Remote"
+    actions['Python'] = "Remote"
     if os_part == "elf":
       actions['Newlib'] = "Remote"
       if self.tot:
 	actions['Toolchain Build'] = "Bare Metal - nosmallclib"
-      elif not self.gold:
-	actions['SmallClib'] = "Remote"
-	actions['Toolchain Build'] = "Bare Metal - nogold"
       else:
 	actions['SmallClib'] = "Remote"
-	actions['Toolchain Build'] = "Bare Metal - qemu"
+	actions['Toolchain Build'] = "Bare Metal - qemu,python"
     else:
       actions['Glibc'] = "Remote"
       actions['uClibc'] = "Remote"
-      if self.gold:
-	actions['Toolchain Build'] = "Linux - qemu"
-      else:
-	actions['Toolchain Build'] = "Linux - nogold"
+      actions['Toolchain Build'] = "Linux - qemu,python"
 
     t.tasks['MIPS Toolchain'] = actions
 
@@ -401,22 +394,16 @@ class Addon:
     actions = {}
     actions['Binutils'] = "Remote"
     actions['GCC'] = "Remote"
-    if self.gold:
-      actions['GOLD'] = "Remote"
+    actions['GOLD'] = "Remote"
     actions['GDB'] = "Remote"
     actions['QEMU'] = "Remote"
     actions['Packages'] = "Remote"
     actions['Dejagnu'] = "Remote"
+    actions['Python'] = "Remote"
     if os_part == "elf":
-      if self.gold:
-	actions['Toolchain Build'] = "Bare Metal - Canadian Cross - qemu"
-      else:
-	actions['Toolchain Build'] = "Bare Metal - Canadian Cross - nogold"
+      actions['Toolchain Build'] = "Bare Metal - Canadian Cross - qemu,python"
     else:
-      if self.gold:
-	actions['Toolchain Build'] = "Linux - Canadian Cross - qemu"
-      else:
-	actions['Toolchain Build'] = "Linux - Canadian Cross - nogold"
+      actions['Toolchain Build'] = "Linux - Canadian Cross - qemu,python"
 	
     actions['Toolchain Prebuilt'] = "Custom"
     t.tasks['MIPS Toolchain'] = actions
