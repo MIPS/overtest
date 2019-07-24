@@ -38,7 +38,6 @@ class A117830(Action, GCC4RegressionParser):
 
     env = {}
     env['PATH'] = CONFIG.makeSearchPath([os.path.join(toolchain_root, "bin"),
-					 "/user/rgi_data2/Verify/CentOS-5/Tcl_8.6.4_x64/root/bin",
 					 dejagnu, os.environ['PATH']])
 
     if triple.startswith("nanomips"):
