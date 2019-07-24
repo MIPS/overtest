@@ -350,18 +350,17 @@ class Action(Execute):
       gitCmd = gitCmd + ["--depth", "1"]
     gitCmd = gitCmd + [remote, self.name.lower()]
 
-    # Execute a command overriding some environment variables
-    for i in range(30):
-      result = self.execute(workdir=self.getSharedPath(),
-			    command=gitCmd)
-      if result == 0:
-	break
-      else:
-	time.sleep(random.randint(1,30))
-
-    if result != 0:
-      self.error("Unable to clone repository")
-
+    if not os.path.exists (os.path.join(self.getSharedPath(), self.name.lower())):
+      # Execute a command overriding some environment variables
+      for i in range(30):
+        result = self.execute(workdir=self.getSharedPath(),
+			      command=gitCmd)
+        if result == 0:
+	  break
+        else:
+	  time.sleep(random.randint(1,30))
+      if result != 0:
+        self.error("Unable to clone repository")
 
     result = self.execute(workdir=os.path.join(self.getSharedPath(), self.name.lower()),
 			  command=[CONFIG.git, "config", "core.preloadIndex", "false"])
