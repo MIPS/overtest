@@ -143,6 +143,8 @@ class Addon:
           continue
         if vendor[:3] == "mti" and "img" in self.runlist:
           continue
+        if vendor[3] == "mti" and "mti-only" in self.runlist:
+          continue
         for os_part in ["elf", "linux-gnu"]:
           if not os_part in self.runlist:
             continue
