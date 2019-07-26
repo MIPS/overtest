@@ -177,7 +177,7 @@ class A117819(Action):
     if self.testrun.getVersion("QEMU") != None:
       build_qemu = True
 
-    components = ["expat", "termcap", "ncurses", "texinfo"]
+    components = ["expat", "termcap", "ncurses", "texinfo", "openssl"]
     opt_components = []
     if self.version.startswith("Linux"):
       opt_components = ["make", "bison"]
