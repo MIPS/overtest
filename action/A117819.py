@@ -27,7 +27,7 @@ class A117819(Action):
       else:
         self.concurrency = 12
 
-    if not os.path.exists ("mips_tool_chain"):
+    if not os.path.exists (os.path.join(self.getWorkPath(), "mips_tool_chain")):
       # Execute a command overriding some environment variables
       for i in range(30):
         result = self.execute(command=[CONFIG.git, "clone",
