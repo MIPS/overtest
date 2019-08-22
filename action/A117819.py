@@ -303,7 +303,7 @@ class A117819(Action):
       if arch == "nanomips":
         linux = os.path.join(self.testrun.getSharedPath("Packages"), "packages", "linux-nda.tar.gz")
       else:
-	linux = os.path.join(self.testrun.getSharedPath("Packages"), "packages", "linux-4.7.3.tar.gz")
+	linux = os.path.join(self.testrun.getSharedPath("Packages"), "packages", "linux-4.9.189.tar.bz2")
       options.append("--src=linux:%s" % linux)
       sysroot = os.path.join(install, "sysroot")
       options.append("--sysroot=%s" % sysroot)
