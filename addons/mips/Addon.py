@@ -197,18 +197,18 @@ class Addon:
                   tests.extend(testconfigs.get_r6_n32_linux_configs(vendor))
                   tests.extend(testconfigs.get_r6_n64_linux_configs(vendor))
                 if vendor != "img":
-                  tests.extend(testconfigs.get_r2_o32_linux_configs(vendor[:3]))
-                  tests.extend(testconfigs.get_r2_n32_linux_configs(vendor[:3]))
-                  tests.extend(testconfigs.get_r2_n64_linux_configs(vendor[:3]))
+                  tests.extend(testconfigs.get_r2_o32_linux_configs())
+                  tests.extend(testconfigs.get_r2_n32_linux_configs())
+                  tests.extend(testconfigs.get_r2_n64_linux_configs())
               elif os_part == "elf":
                 if vendor != "mti-only":
                   tests.extend(testconfigs.get_r6_o32_elf_configs(vendor))
                   tests.extend(testconfigs.get_r6_n32_elf_configs(vendor))
                   tests.extend(testconfigs.get_r6_n64_elf_configs(vendor))
                 if vendor != "img":
-                  tests.extend(testconfigs.get_r2_o32_elf_configs(vendor[:3]))
-                  tests.extend(testconfigs.get_r2_n32_elf_configs(vendor[:3]))
-                  tests.extend(testconfigs.get_r2_n64_elf_configs(vendor[:3]))
+                  tests.extend(testconfigs.get_r2_o32_elf_configs())
+                  tests.extend(testconfigs.get_r2_n32_elf_configs())
+                  tests.extend(testconfigs.get_r2_n64_elf_configs())
             else:
               if os_part == "linux-gnu":
                 tests.extend(testconfigs.get_linux_configs())
