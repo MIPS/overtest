@@ -66,8 +66,10 @@ class A117833(Action):
     archive_dir = os.path.join(workdir, prefix)
     archive_script = os.path.join (git_dir, "scripts", "archive-source.sh")
     archive_out = os.path.join(archive_dir, "qemu.tar")
-    os.mkdir(archive_dir)
-    result = self.execute(command=[archive_script, archive_out], workdir=git_dir)
+    git_path= "%s:%s" % (os.path.dirname(CONFIG.git), os.environ['PATH'])
+    if not os.path.exists(archive_dir):
+      os.mkdir(archive_dir)
+    result = self.execute(command=[archive_script, archive_out], env={'PATH':git_path}, workdir=git_dir)
     if result != 0:
       self.error("Unable to create %s archive from scripts/archive-source.sh" % component)
 
