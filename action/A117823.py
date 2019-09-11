@@ -17,6 +17,29 @@ class A117823(Action, GCC4RegressionParser):
     if value != "":
       config.append(option % value)
 
+  def _getKernelVersion (self):
+    found = None
+    matchver = None
+    for root, dirs, files in os.walk(self.config.getVariable("Toolchain Root")):
+      for file in files:
+        if (file == "version.h" and root.endswith("linux")):
+          found =  os.path.join (root, file)
+          break
+      if (found != None):
+        f = open(found, mode='r')
+        text = f.read()
+        f.close()
+        matchver = re.search ('define LINUX_VERSION_CODE ([0-9]+)', text)
+        break
+    if matchver:
+      version = int(matchver.group(1))
+    else:
+      version = (4 << 16 | 5 << 8)
+    if (version >= (4 << 16 | 8 << 8)):
+      return "4.8.0"
+    else:
+      return "4.5.0"
+
   # Execute the action.
   def run(self):
     dejagnu = os.path.join(self.testrun.getSharedPath("Dejagnu"), "dejagnu")
@@ -37,7 +60,6 @@ class A117823(Action, GCC4RegressionParser):
 
     env = {}
     env['PATH'] = CONFIG.makeSearchPath([os.path.join(toolchain_root, "bin"),
-					 "/user/rgi_data2/Verify/CentOS-5/Tcl_8.6.4_x64/root/bin",
 					 dejagnu, os.environ['PATH']])
 
     if triple.startswith("nanomips"):
@@ -68,6 +90,7 @@ class A117823(Action, GCC4RegressionParser):
 	  suffix = ""
         else:
 	  suffix = abi
+	kernel_version = self._getKernelVersion ()
 	if triple.startswith("nanomips"):
 	  cpu = "nanomips-generic"
 	  if endian == "eb":
@@ -78,7 +101,7 @@ class A117823(Action, GCC4RegressionParser):
 	    suffix = "%sel" % suffix
 	  qemu_exec = os.path.join(qemu_root, "bin", "qemu-mips%s" % suffix)
         env['DEJAGNU_SIM'] = qemu_exec
-        env['DEJAGNU_SIM_OPTIONS'] = "-r 4.5.0 -cpu %s" % cpu
+        env['DEJAGNU_SIM_OPTIONS'] = "-r %s -cpu %s" % (kernel_version, cpu)
         env['DEJAGNU_SIM_GCC'] = gcc_exec
       else:
         board = "generic-sim"
