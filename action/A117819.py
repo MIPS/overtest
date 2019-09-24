@@ -153,8 +153,6 @@ class A117819(Action):
       # A canadian cross consumes a prebuilt toolchain
       reference_root = self.config.getVariable("Toolchain Root")
       host_path = ":".join([os.path.join(reference_root, "bin"),host_path])
-      if os.path.exists(os.path.join(reference_root, "python-root")):
-        host_path = ":".join([os.path.join(reference_root, "python-root", "bin"),host_path])
       # It also just steals all target files from the reference to
       # save build time and avoid unneccessary differences in target
       # objects
