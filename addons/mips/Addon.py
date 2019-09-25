@@ -316,7 +316,8 @@ class Addon:
     actions['uClibc'] = "Remote"
     actions['QEMU'] = "Remote"
     actions['Python'] = "Remote"
-    actions['Toolchain Source'] = "All - qemu,python"
+    actions['Packages'] = "Remote"
+    actions['Toolchain Source'] = "All - MTI - 2019.09"
 
     t.tasks['MIPS Toolchain'] = actions
 
