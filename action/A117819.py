@@ -249,7 +249,7 @@ class A117819(Action):
 	self.error("Failed to build %s" % component)
 
     # Prepare special build options for python
-    if self.testrun.getVersion("Python") != None:
+    if self.testrun.getVersion("Python") != None and "mingw" not in host_triple:
       options = ["--git_home=git://dmz-portal.mipstec.com",
 	         "--prefix=%s/python-root" % install,
 	         "--build=%s" % build,
@@ -464,7 +464,7 @@ class A117819(Action):
     if self.execute(command=[" ".join(cmd + [extra_host, "gdb"])], shell=True) != 0:
       self.error("Failed to build gdb")
 
-    if self.testrun.getVersion("Python") != None:
+    if self.testrun.getVersion("Python") != None and "mingw" not in host_triple:
       if self.execute(command=[" ".join(cmd + [extra_host, "gdb-py"])], shell=True) != 0:
         self.error("Failed to build gdb-py")
 
