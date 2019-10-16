@@ -5,7 +5,9 @@ import re
 
 # Toolchain Source
 
-component_map = {"GCC":"gcc",
+component_map = {
+		 "Packages":"packages",
+                 "GCC":"gcc",
 		 "Binutils":"binutils",
 		 "GDB":"gdb",
 		 "Newlib":"newlib",
@@ -33,7 +35,7 @@ class A117833(Action):
     self.createDirectory(install_root)
 
     for component in component_map:
-      if self.testrun.getVersion(component) == None:
+      if self.testrun.getVersion(component) == None and component != "Packages":
 	continue
       git_dir = os.path.join(self.testrun.getSharedPath(component), component_map[component])
       prefix = "%s-%s" % (component_map[component], rel_version)
