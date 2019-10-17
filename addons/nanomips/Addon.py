@@ -37,7 +37,7 @@ class Addon:
     storage=None
     groupname=None
     tot=False
-    runlist="source,cross,canadian,elf,linux-musl,img,g++,gcc,gnusim,binutils-build,gold,gdb,gas,ld,binutils".split(",")
+    runlist="source,cross,canadian,elf,linux-musl,g++,gcc,gnusim,binutils-build,gold,gdb,gas,ld,binutils".split(",")
     newrunlist=None
 
     for (o,a) in opts:
@@ -261,7 +261,8 @@ class Addon:
     actions['Musl'] = "Remote"
     actions['QEMU'] = "Remote"
     actions['Python'] = "Remote"
-    actions['Toolchain Source'] = "All - musl,qemu,python"
+    actions['Packages'] = "Remote"
+    actions['Toolchain Source'] = "All - nanoMIPS - 2019.10"
 
     t.tasks['MIPS Toolchain'] = actions
 
