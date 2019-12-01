@@ -15,3 +15,4 @@ class Config(ConfigFactory.DefaultConfig):
   searchPathSep = ':'
   p4 = '/meta/perforce/bin/p4'
   gitref = "/projects/mipssw/git"
+  gitremote = "https://github.com/MIPS"

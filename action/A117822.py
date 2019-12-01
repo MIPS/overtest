@@ -20,7 +20,7 @@ class A117822(Action):
       result = self.execute(command=[CONFIG.git, "clone",
                                      "--reference=%s/mips_tool_chain.git" % CONFIG.git,
                                      "--branch=master",
-                                     "git://dmz-portal.mipstec.com/mips_tool_chain.git",
+                                     "%s/mips_tool_chain.git" % CONFIG.gitremote,
                                      "mips_tool_chain"])
       if result == 0:
 	break
@@ -31,7 +31,7 @@ class A117822(Action):
       self.error("Unable to clone repository")
 
     # Now construct the work area
-    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), "git://dmz-portal.mipstec.com")],
+    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), CONFIG.gitremote)],
 			  workdir=os.path.join(self.getWorkPath(), "mips_tool_chain"),
 			  shell=True)
     if result != 0:
@@ -71,7 +71,7 @@ class A117822(Action):
 
     build = os.path.join(self.getWorkPath(), "obj-qemu")
 
-    options = ["--git_home=git://dmz-portal.mipstec.com",
+    options = ["--git_home=%s" % CONFIG.gitremote,
 	       "--prefix=%s" % hostinstall,
 	       "--hostlibs=%s" % hostinstall,
 	       "--jobs=%d" % self.concurrency]
@@ -103,7 +103,7 @@ class A117822(Action):
       self.error("Failed to build glib")
 
     options = ["--path=%s" % os.path.join(install, "bin"),
-	       "--git_home=git://dmz-portal.mipstec.com",
+	       "--git_home=%s" % CONFIG.gitremote,
 	       "--build=%s" % build,
 	       "--prefix=%s" % install,
 	       "--target=mips-elf",

@@ -33,7 +33,7 @@ class A117819(Action):
         result = self.execute(command=[CONFIG.git, "clone",
                                        "--reference=%s/mips_tool_chain.git" % CONFIG.gitref,
                                        "--branch=master",
-                                       "git://dmz-portal.mipstec.com/mips_tool_chain.git",
+                                       "%s/mips_tool_chain.git" % CONFIG.gitremote,
                                        "mips_tool_chain"])
         if result == 0:
           break
@@ -44,7 +44,7 @@ class A117819(Action):
         self.error("Unable to clone repository")
 
     # Now construct the work area
-    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), "git://dmz-portal.mipstec.com")],
+    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), CONFIG.gitremote)],
 			  workdir=os.path.join(self.getWorkPath(), "mips_tool_chain"),
 			  shell=True)
     if result != 0:
@@ -168,7 +168,7 @@ class A117819(Action):
       self.config.setVariable("Toolchain Root", install)
 
     # Unpack the build/host support libraries source
-    options = ["--git_home=git://dmz-portal.mipstec.com",
+    options = ["--git_home=%s" % CONFIG.gitremote,
 	       "--prefix=/none",
 	       "--jobs=%d" % self.concurrency]
 
@@ -211,7 +211,7 @@ class A117819(Action):
       self.error("Failed to unpack build/host components")
 
     # Build 'build' support libraries for all tools
-    options = ["--git_home=git://dmz-portal.mipstec.com",
+    options = ["--git_home=%s" % CONFIG.gitremote,
 	       "--prefix=%s" % buildinstall,
 	       "--build=%s" % build,
 	       "--jobs=%d" % self.concurrency]
@@ -224,7 +224,7 @@ class A117819(Action):
 	self.error("Failed to build %s" % component)
 
     # Unpack host support libraries source
-    options = ["--git_home=git://dmz-portal.mipstec.com",
+    options = ["--git_home=%s" % CONFIG.gitremote,
 	       "--prefix=%s" % hostinstall,
 	       "--build=%s" % build,
 	       "--jobs=%d" % self.concurrency]
@@ -250,7 +250,7 @@ class A117819(Action):
 
     # Prepare special build options for python
     if self.testrun.getVersion("Python") != None and "mingw" not in host_triple:
-      options = ["--git_home=git://dmz-portal.mipstec.com",
+      options = ["--git_home=%s" % CONFIG.gitremote,
 	         "--prefix=%s/python-root" % install,
 	         "--build=%s" % build,
                  "--host=%s" % host_triple,
@@ -270,7 +270,7 @@ class A117819(Action):
 
     # Prepare for main tools build
     options = ["--path=%s" % host_path,
-	       "--git_home=ssh://gitosis@dmz-portal.mips.com",
+	       "--git_home=%s" % CONFIG.gitremote,
 	       "--build=%s" % build,
 	       "--prefix=%s" % install,
 	       "--target=%s" % target,
@@ -473,7 +473,7 @@ class A117819(Action):
 	self.error("Failed to build qemu")
 
     # Set the permissions to match release requirements
-    if self.execute(command=["chmod", "-R", "o=g", install]) != 0:
+    if self.execute(command=["chmod", "-R", "o+rX", install]) != 0:
       self.error("Failed to set permissions")
 
     self.execute(command=["strip -d bin/* %s/bin/* libexec/gcc/%s/*/* python-root/bin/*" % (target, target)],

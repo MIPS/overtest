@@ -24,7 +24,7 @@ class A117837(Action):
       result = self.execute(command=[CONFIG.git, "clone",
                                      "--reference=%s/mips_tool_chain.git" % CONFIG.gitref,
                                      "--branch=master",
-                                     "git://dmz-portal.mipstec.com/mips_tool_chain.git",
+                                     "%s/mips_tool_chain.git" % CONFIG.gitremote,
                                      "mips_tool_chain"])
       if result == 0:
 	break
@@ -35,7 +35,7 @@ class A117837(Action):
       self.error("Unable to clone repository")
 
     # Now construct the work area
-    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), "git://dmz-portal.mipstec.com")],
+    result = self.execute(command=["build_scripts/make_workarea %s %s" % (self.getWorkPath(), CONFIG.gitremote)],
 			  workdir=os.path.join(self.getWorkPath(), "mips_tool_chain"),
 			  shell=True)
     if result != 0:
@@ -72,7 +72,7 @@ class A117837(Action):
 
     # Prepare for main tools build
     options = ["--path=%s" % host_path,
-	       "--git_home=ssh://gitosis@dmz-portal.mips.com",
+	       "--git_home=%s" % CONFIG.gitremote,
 	       "--build=%s" % build,
 	       "--prefix=%s" % install,
 	       "--target=%s" % target,
