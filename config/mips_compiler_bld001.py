@@ -15,3 +15,4 @@ class Config(config.centos5.Config):
   git = "/usr/local/bin/git"
   cores = 48
   gitref = "/scratch/overtest/git"
+  tmpdir = "/dev/shm"
