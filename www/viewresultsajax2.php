@@ -700,7 +700,8 @@ function showResultTable($testrunids, $group_json, $testsuiteid, $resultStabilit
   $timings['tableoutput']['extra'] = "";
 
   $groupsect = array();
-  $groupsect = $grouplists[count($grouplists)-2];
+  if (count($grouplists) > 2)
+    $groupsect = $grouplists[count($grouplists)-2];
   output_table_footer($finalgrouplist, $testrunids, $testsuiteid, $allfields, $options, $groupsect);
 
   $options['output']['end_table']();
