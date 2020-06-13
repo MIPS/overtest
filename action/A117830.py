@@ -124,6 +124,7 @@ class A117830(Action, GCC4RegressionParser):
         env['DEJAGNU_SIM'] = qemu_exec
         env['DEJAGNU_SIM_OPTIONS'] = "-r %s -cpu %s" % (kernel_version, cpu)
         env['DEJAGNU_SIM_GCC'] = gcc_exec
+        env['ASAN_OPTIONS'] = "color=never"
       else:
         board = "generic-sim"
         if abi == "32" or abi == "p32":
