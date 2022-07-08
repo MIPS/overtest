@@ -163,6 +163,8 @@ class A117819(Action):
 	host_version = self.config.getVariable("Host Version")
 	host_bin = "/projects/mipssw/toolchains/%s/%s/bin" % (host_triple, host_version)
 	host_path = ":".join([host_path, host_bin])
+	# Add a path to pick up gcc and g++
+	host_path = ":".join([host_path, "/projects/mipssw/toolchains/native/bin"])
     except ConfigException, e:
       host_triple = ""
       pass
